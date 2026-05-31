@@ -327,10 +327,9 @@ html,body{
   font-size:3vw;color:var(--muted);cursor:pointer;backdrop-filter:blur(10px)}
 
 /* ─── VIDEO ─── */
-.cam-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:7vw;transform:scaleX(-1)}
-.cam-video.hidden{opacity:0;pointer-events:none}
-.cam-video.visible{opacity:1}
-.cam-video-placeholder{font-size:15vw;opacity:0.3}
+.cam-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:7vw;transform:scaleX(-1);z-index:1;background:#000}
+.cam-loading-overlay{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#150a2a,#0a0514)}
+.cam-video-placeholder{font-size:15vw;opacity:0.3;position:absolute}
 
 /* Screen layout helpers */
 .screen-page{display:flex;flex-direction:column;min-height:100dvh;height:100dvh;overflow:hidden;background:var(--bg)}

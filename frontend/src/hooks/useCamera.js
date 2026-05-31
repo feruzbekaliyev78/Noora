@@ -1,15 +1,10 @@
 import { useRef, useEffect, useCallback, useState } from 'react'
 
-function getVideoConstraints() {
-  return {
-    video: {
-      facingMode: { ideal: 'user' },
-      width: { ideal: 1280 },
-      height: { ideal: 720 }
-    },
-    audio: false
-  }
-}
+const CAMERA_CONSTRAINTS = [
+  { video: { facingMode: { ideal: 'user' } }, audio: false },
+  { video: { facingMode: 'user' }, audio: false },
+  { video: true, audio: false }
+]
 
 export function useCamera(initialStream = null) {
   const videoRef = useRef(null)
@@ -40,7 +35,7 @@ export function useCamera(initialStream = null) {
 
     try {
       setError(null)
-      const stream = await navigator.mediaDevices.getUserMedia(getVideoConstraints())
+      const stream = await requestCameraStream()
       await attachStream(stream)
     } catch (err) {
       setReady(false)
@@ -80,5 +75,15 @@ export async function requestCameraStream() {
   if (!navigator.mediaDevices?.getUserMedia) {
     throw new Error('Camera API unavailable')
   }
-  return navigator.mediaDevices.getUserMedia(getVideoConstraints())
+
+  let lastError
+  for (const constraints of CAMERA_CONSTRAINTS) {
+    try {
+      return await navigator.mediaDevices.getUserMedia(constraints)
+    } catch (err) {
+      lastError = err
+    }
+  }
+
+  throw lastError
 }
