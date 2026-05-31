@@ -16,7 +16,7 @@ export function I18nProvider({ children }) {
 
   const t = useCallback(
     (key, vars) => {
-      let str = translations[lang][key] || translations.ru[key] || key
+      let str = translations[lang]?.[key] ?? translations.ru?.[key] ?? key
       if (vars) {
         Object.entries(vars).forEach(([k, v]) => {
           str = str.replace(`{${k}}`, v)

@@ -15,16 +15,21 @@ function ZoneBadge({ label, score, className }) {
 }
 
 export default function FaceZones({ zones, title }) {
-  if (!zones) return null
+  const z = {
+    forehead: zones?.forehead ?? 0,
+    nose: zones?.nose ?? 0,
+    cheeks: zones?.cheeks ?? 0,
+    chin: zones?.chin ?? 0
+  }
 
   return (
     <div className="face-zones">
       <div className="zone-title">{title}</div>
       <div className="face-map">
-        <ZoneBadge label="Лоб" score={zones.forehead} className="zone-top" />
-        <ZoneBadge label="Нос" score={zones.nose} className="zone-center" />
-        <ZoneBadge label="Щёки" score={zones.cheeks} className="zone-sides" />
-        <ZoneBadge label="Подб" score={zones.chin} className="zone-bottom" />
+        <ZoneBadge label="Лоб" score={z.forehead} className="zone-top" />
+        <ZoneBadge label="Нос" score={z.nose} className="zone-center" />
+        <ZoneBadge label="Щёки" score={z.cheeks} className="zone-sides" />
+        <ZoneBadge label="Подб" score={z.chin} className="zone-bottom" />
         <div className="face-map-outline">👤</div>
       </div>
     </div>

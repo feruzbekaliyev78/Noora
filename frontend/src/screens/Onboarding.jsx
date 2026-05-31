@@ -37,8 +37,7 @@ export default function Onboarding() {
           <div className="ob-name">OORA</div>
         </div>
         <div className="ob-hl">
-          {t('onboardingTitle1')}<br />
-          {t('onboardingTitle2') && <>{t('onboardingTitle2')}<br /></>}
+          {t('onboardingTitle1')}{' '}
           <span className="grd ital">{t('onboardingTitleAccent')}</span>
         </div>
         <div className="ob-desc">{t('onboardingDesc')}</div>
