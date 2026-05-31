@@ -1,4 +1,7 @@
-export async function generateShareCard(data, profile, capturedImage) {
+import { getShareLabels, formatPores, formatTexture } from '../i18n/translations'
+
+export async function generateShareCard(data, profile, capturedImage, lang = 'ru') {
+  const labels = getShareLabels(lang)
   const canvas = document.createElement('canvas')
   canvas.width = 1080
   canvas.height = 1920
@@ -23,26 +26,30 @@ export async function generateShareCard(data, profile, capturedImage) {
 
   ctx.textAlign = 'center'
 
-  const logoGrad = ctx.createLinearGradient(400, 80, 680, 80)
+  const logoGrad = ctx.createLinearGradient(200, 60, 880, 160)
   logoGrad.addColorStop(0, '#BF5AF2')
-  logoGrad.addColorStop(1, '#FF375F')
-  ctx.font = 'bold 60px "Bebas Neue", sans-serif'
+  logoGrad.addColorStop(0.5, '#FF375F')
+  logoGrad.addColorStop(1, '#FF8FAB')
+  ctx.font = 'bold 140px "Bebas Neue", sans-serif'
   ctx.fillStyle = logoGrad
-  ctx.fillText('NOORA', 540, 100)
+  ctx.shadowColor = 'rgba(191,90,242,0.6)'
+  ctx.shadowBlur = 40
+  ctx.fillText('NOORA', 540, 150)
+  ctx.shadowBlur = 0
 
   if (capturedImage) {
     const img = await loadImage(capturedImage)
     ctx.save()
     ctx.beginPath()
-    ctx.arc(540, 320, 120, 0, Math.PI * 2)
+    ctx.arc(540, 360, 130, 0, Math.PI * 2)
     ctx.clip()
-    ctx.drawImage(img, 420, 200, 240, 240)
+    ctx.drawImage(img, 410, 230, 260, 260)
     ctx.restore()
   }
 
-  ctx.font = '36px "Outfit", sans-serif'
-  ctx.fillStyle = 'rgba(245,238,255,0.6)'
-  ctx.fillText(`${profile.name} · ${profile.city}`, 540, 480)
+  ctx.font = 'bold 44px "Outfit", sans-serif'
+  ctx.fillStyle = '#F5EEFF'
+  ctx.fillText(profile.name || 'NOORA', 540, 540)
 
   const scoreGrad = ctx.createLinearGradient(300, 700, 780, 700)
   scoreGrad.addColorStop(0, '#9B59FF')
@@ -50,35 +57,35 @@ export async function generateShareCard(data, profile, capturedImage) {
   scoreGrad.addColorStop(1, '#FF375F')
   ctx.font = '300px "Bebas Neue", sans-serif'
   ctx.fillStyle = scoreGrad
-  ctx.fillText(String(data.skinScore), 540, 900)
+  ctx.fillText(String(data.skinScore), 540, 920)
 
   ctx.font = '48px "Outfit", sans-serif'
   ctx.fillStyle = '#F5EEFF'
-  ctx.fillText(`Возраст кожи: ${data.skinAge} лет`, 540, 1100)
+  ctx.fillText(labels.skinAge(data.skinAge), 540, 1120)
 
   const stats = [
     `${data.hydration}%`,
     `${data.tone}%`,
-    data.pores,
-    data.texture
+    formatPores(data.pores, lang),
+    formatTexture(data.texture, lang)
   ]
-  const labels = ['Увлажн', 'Тон', 'Поры', 'Текст']
+
   stats.forEach((val, i) => {
     const x = 135 + i * 270
     ctx.fillStyle = 'rgba(255,255,255,0.04)'
-    roundRect(ctx, x - 100, 1200, 200, 120, 20)
+    roundRect(ctx, x - 100, 1220, 200, 120, 20)
     ctx.fill()
     ctx.font = 'bold 40px "Outfit", sans-serif'
     ctx.fillStyle = scoreGrad
-    ctx.fillText(val, x, 1260)
+    ctx.fillText(val, x, 1280)
     ctx.font = '28px "Outfit", sans-serif'
     ctx.fillStyle = 'rgba(245,238,255,0.45)'
-    ctx.fillText(labels[i], x, 1300)
+    ctx.fillText(labels.stats[i], x, 1320)
   })
 
   ctx.font = '40px "Outfit", sans-serif'
   ctx.fillStyle = 'rgba(245,238,255,0.45)'
-  ctx.fillText('Проверь свою кожу → noora.uz', 540, 1800)
+  ctx.fillText(labels.cta, 540, 1820)
 
   return canvas.toDataURL('image/jpeg', 0.92)
 }
@@ -106,14 +113,15 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.closePath()
 }
 
-export async function shareCardImage(imageDataUrl, skinScore) {
+export async function shareCardImage(imageDataUrl, skinScore, lang = 'ru') {
+  const labels = getShareLabels(lang)
   const blob = await (await fetch(imageDataUrl)).blob()
   const file = new File([blob], 'noora-skin.jpg', { type: 'image/jpeg' })
 
   if (navigator.share && navigator.canShare?.({ files: [file] })) {
     await navigator.share({
-      title: 'Мой результат NOORA',
-      text: `Мой Skin Score: ${skinScore} 🔥 Проверь свою кожу!`,
+      title: labels.shareTitle,
+      text: labels.shareText(skinScore),
       files: [file]
     })
     return true

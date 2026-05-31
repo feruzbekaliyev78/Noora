@@ -1,15 +1,26 @@
 export const translations = {
   ru: {
-    splashSub: 'AI Skin Analysis',
-    onboardingTitle1: 'ТВОЯ',
-    onboardingTitle2: 'КОЖА',
+    splashSub: 'AI анализ кожи',
+    profileTitle: 'Расскажи о себе',
+    profileSubtitle: 'Это нужно для персонального анализа',
+    nameLabel: 'Имя',
+    ageLabel: 'Возраст',
+    continueBtn: 'Продолжить →',
+    profileNameRequired: 'Введите имя',
+    profileAgeRequired: 'Введите возраст',
+    onboardingTitle1: 'ТВОЯ КОЖА',
+    onboardingTitle2: '',
     onboardingTitleAccent: 'сияет.',
     onboardingDesc: 'ИИ анализирует кожу за 10 секунд. Узнай возраст кожи — поделись с подругой 🔥',
     startAnalysis: 'Начать анализ →',
     hasAccount: 'Уже есть аккаунт',
     scanning: 'Сканирование',
-    lightOk: 'Свет отличный',
-    closer: 'Чуть ближе',
+    lightGood: 'Свет OK',
+    lightBad: 'Слишком темно',
+    faceGood: 'Лицо OK',
+    faceBad: 'Лицо не видно',
+    tipsTitle: 'Советы для сканирования',
+    galleryError: 'Не удалось загрузить фото',
     tipLight: 'Хороший свет',
     tipNoMakeup: 'Без макияжа',
     tipLook: 'В камеру',
@@ -27,12 +38,15 @@ export const translations = {
     skinAge: 'ВОЗРАСТ КОЖИ',
     years: 'года',
     realAge: 'Реальный возраст',
+    yearsYounger: '{n} лет моложе! 🔥',
+    skinNeedsCare: 'Кожа требует ухода 💧',
     hydration: 'Увлажнение',
     tone: 'Тон кожи',
     pores: 'Поры',
     texture: 'Текстура',
     shareResult: '⬆ Поделиться результатом',
     share: '⬆ Поделиться',
+    shareCard: 'Карточка',
     download: 'Скачать',
     checkSkin: 'Проверь свою кожу →',
     tabHome: 'Главная',
@@ -53,25 +67,47 @@ export const translations = {
     battleSub: 'Сравни кожу с подругой',
     vs: 'VS',
     battleShare: 'Поделиться баттлом',
+    battleWinner: '👑 {name} — Skin Score {you} vs {friend}',
+    battleScoreLine: 'Skin Score {you} vs {friend}',
+    battleHydrationBetter: 'У тебя увлажнение лучше',
+    battleToneBetter: 'у подруги тон ровнее',
     winner: 'Победитель',
     cardReady: 'Карточка готова! 🚀',
     saved: 'Сохранено в галерею! 📸',
     lookYounger: 'выгляжу на {n} лет моложе! 🔥',
     skinAgeLabel: 'Возраст кожи',
+    shareSkinAge: 'Возраст кожи: {n} лет',
+    shareHydration: 'Увлажн',
+    shareTone: 'Тон',
+    sharePores: 'Поры',
+    shareTexture: 'Текст',
+    shareTitle: 'Мой результат NOORA',
+    shareText: 'Мой Skin Score: {n} 🔥 Проверь свою кожу!',
     cameraError: 'Не удалось открыть камеру',
     analyzeError: 'Ошибка анализа. Попробуй снова.'
   },
   uz: {
-    splashSub: 'AI Teri Tahlili',
-    onboardingTitle1: 'TERING',
+    splashSub: 'AI teri tahlili',
+    profileTitle: 'O\'zingiz haqingizda',
+    profileSubtitle: 'Shaxsiy tahlil uchun kerak',
+    nameLabel: 'Ism',
+    ageLabel: 'Yosh',
+    continueBtn: 'Davom etish →',
+    profileNameRequired: 'Ismingizni kiriting',
+    profileAgeRequired: 'Yoshingizni kiriting',
+    onboardingTitle1: 'SENING TERING',
     onboardingTitle2: '',
     onboardingTitleAccent: 'porlaydi.',
     onboardingDesc: 'AI teringizni 10 soniyada tahlil qiladi. Teri yoshini bil — do\'sting bilan ulash 🔥',
     startAnalysis: 'Tahlilni boshlash →',
     hasAccount: 'Akkauntim bor',
     scanning: 'Skanerlash',
-    lightOk: 'Yorug\'lik a\'lo',
-    closer: 'Biroz yaqinroq',
+    lightGood: 'Yorug\'lik OK',
+    lightBad: 'Juda qorong\'i',
+    faceGood: 'Yuz OK',
+    faceBad: 'Yuz ko\'rinmayapti',
+    tipsTitle: 'Skanerlash maslahatlari',
+    galleryError: 'Rasmni yuklab bo\'lmadi',
     tipLight: 'Yaxshi yorug\'lik',
     tipNoMakeup: 'Makiyajsiz',
     tipLook: 'Kameraga qarang',
@@ -89,12 +125,15 @@ export const translations = {
     skinAge: 'TERI YOSHI',
     years: 'yosh',
     realAge: 'Haqiqiy yosh',
+    yearsYounger: '{n} yosh yoshroq! 🔥',
+    skinNeedsCare: 'Teri parvarish talab qiladi 💧',
     hydration: 'Namlik',
     tone: 'Teri tonusi',
     pores: 'Teshiklar',
     texture: 'Tekstura',
     shareResult: '⬆ Natijani ulashish',
     share: '⬆ Ulashish',
+    shareCard: 'Karta',
     download: 'Yuklab olish',
     checkSkin: 'O\'z teringni tekshir →',
     tabHome: 'Bosh sahifa',
@@ -115,14 +154,35 @@ export const translations = {
     battleSub: 'Do\'sting bilan solishtir',
     vs: 'VS',
     battleShare: 'Jangni ulashish',
+    battleWinner: '👑 {name} — Skin Score {you} vs {friend}',
+    battleScoreLine: 'Skin Score {you} vs {friend}',
+    battleHydrationBetter: 'Sening namliging yaxshiroq',
+    battleToneBetter: 'do\'stingda tonus tekisroq',
     winner: 'G\'olib',
     cardReady: 'Karta tayyor! 🚀',
     saved: 'Galereyaga saqlandi! 📸',
     lookYounger: '{n} yosh yoshroq ko\'rinaman! 🔥',
     skinAgeLabel: 'Teri yoshi',
+    shareSkinAge: 'Teri yoshi: {n} yosh',
+    shareHydration: 'Namlik',
+    shareTone: 'Tonus',
+    sharePores: 'Teshik',
+    shareTexture: 'Tekst',
+    shareTitle: 'NOORA natijam',
+    shareText: 'Skin Score: {n} 🔥 O\'z teringni tekshir!',
     cameraError: 'Kamerani ochib bo\'lmadi',
     analyzeError: 'Tahlil xatosi. Qayta urinib ko\'ring.'
   }
+}
+
+const PORES_MAP = {
+  ru: { отл: 'Отл', хор: 'Хор', норм: 'Норм', увелич: 'Увел', плохо: 'Плохо' },
+  uz: { отл: 'A\'lo', хор: 'Yaxshi', норм: 'O\'rt', увелич: 'Keng', плохо: 'Yomon' }
+}
+
+const TEXTURE_MAP = {
+  ru: { гладкая: 'Гладкая', хорошая: 'Хорошо', хорошо: 'Хорошо', норм: 'Норм', неровная: 'Неровн.' },
+  uz: { гладкая: 'Silliq', хорошая: 'Yaxshi', хорошо: 'Yaxshi', норм: 'O\'rt', неровная: 'Notekis' }
 }
 
 export function getScoreLabel(score, lang) {
@@ -134,12 +194,21 @@ export function getScoreLabel(score, lang) {
   return t.scoreNeedsCare
 }
 
-export function formatPores(val) {
-  const map = { отл: 'Отл', хор: 'Хор', норм: 'Норм', увелич: 'Увел', плохо: 'Плохо' }
-  return map[val] || val
+export function formatPores(val, lang = 'ru') {
+  return PORES_MAP[lang]?.[val] || PORES_MAP.ru[val] || val
 }
 
-export function formatTexture(val) {
-  const map = { гладкая: 'Гладкая', хорошая: 'Хорошо', хорошо: 'Хорошо', норм: 'Норм', неровная: 'Неровн.' }
-  return map[val] || val
+export function formatTexture(val, lang = 'ru') {
+  return TEXTURE_MAP[lang]?.[val] || TEXTURE_MAP.ru[val] || val
+}
+
+export function getShareLabels(lang) {
+  const t = translations[lang]
+  return {
+    skinAge: (n) => t.shareSkinAge.replace('{n}', n),
+    stats: [t.shareHydration, t.shareTone, t.sharePores, t.shareTexture],
+    cta: t.checkSkin + ' noora.uz',
+    shareTitle: t.shareTitle,
+    shareText: (n) => t.shareText.replace('{n}', n)
+  }
 }

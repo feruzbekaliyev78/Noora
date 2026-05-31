@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 
 const CIRCUMFERENCE = 351.9
 
-export default function ScoreRing({ score, size = '33vw' }) {
+export default function ScoreRing({ score, size = '33vw', label = 'SKIN SCORE' }) {
   const [display, setDisplay] = useState(0)
   const [offset, setOffset] = useState(CIRCUMFERENCE)
 
@@ -42,7 +42,7 @@ export default function ScoreRing({ score, size = '33vw' }) {
       </svg>
       <div className="score-center">
         <div className="score-n">{display}</div>
-        <div className="score-l">SKIN SCORE</div>
+        <div className="score-l">{label}</div>
       </div>
     </div>
   )

@@ -1,13 +1,22 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useI18n } from '../context/I18nContext'
+import { isProfileComplete } from '../context/AppContext'
 
 export default function Splash() {
   const navigate = useNavigate()
   const { t } = useI18n()
 
   useEffect(() => {
-    const timer = setTimeout(() => navigate('/onboarding'), 2200)
+    const timer = setTimeout(() => {
+      try {
+        const raw = localStorage.getItem('noora-profile')
+        const profile = raw ? JSON.parse(raw) : {}
+        navigate(isProfileComplete(profile) ? '/onboarding' : '/profile')
+      } catch {
+        navigate('/profile')
+      }
+    }, 2200)
     return () => clearTimeout(timer)
   }, [navigate])
 

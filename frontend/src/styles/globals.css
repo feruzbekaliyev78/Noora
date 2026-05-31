@@ -126,6 +126,7 @@ html,body{
 .chip{padding:1.5vw 4vw;border-radius:100px;font-size:3vw;font-weight:600;
   display:flex;align-items:center;gap:1.5vw;backdrop-filter:blur(10px)}
 .chip.ok{background:rgba(52,199,89,0.2);color:#34C759;border:1px solid rgba(52,199,89,0.3)}
+.chip.bad{background:rgba(255,55,95,0.2);color:#FF375F;border:1px solid rgba(255,55,95,0.35)}
 .chip.warn{background:rgba(255,159,10,0.2);color:#FF9F0A;border:1px solid rgba(255,159,10,0.3)}
 .chip-dot{width:1.5vw;height:1.5vw;border-radius:50%;background:currentColor;animation:blink 1.5s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
@@ -148,6 +149,9 @@ html,body{
   animation:sGlow 3s ease-in-out infinite;transition:all 0.15s}
 .shutter::before{content:'';position:absolute;inset:4px;border-radius:50%;border:2px solid rgba(255,255,255,0.25)}
 .shutter:active{transform:scale(0.9)}
+.shutter.disabled{opacity:0.35;pointer-events:none;animation:none;box-shadow:none}
+.icon-btn.placeholder{opacity:0;pointer-events:none}
+.screen-header{padding:0 0 2vw}
 @keyframes sGlow{0%,100%{box-shadow:0 0 8vw rgba(191,90,242,0.5)}50%{box-shadow:0 0 14vw rgba(191,90,242,0.8),0 0 24vw rgba(191,90,242,0.3)}}
 
 /* ─── ANALYZING ─── */
@@ -200,6 +204,7 @@ html,body{
 .age-pill{display:inline-block;padding:1.5vw 3.5vw;border-radius:100px;
   background:rgba(52,199,89,0.15);border:1px solid rgba(52,199,89,0.25);
   font-size:3.5vw;color:#34C759;font-weight:700;margin-bottom:1.5vw}
+.age-pill.care{background:rgba(255,55,95,0.12);border-color:rgba(255,55,95,0.25);color:#FF375F}
 .age-hint{font-size:3vw;color:var(--muted)}
 
 .metrics{display:grid;grid-template-columns:1fr 1fr;gap:3vw;margin-bottom:4vw}
@@ -231,8 +236,9 @@ html,body{
 .sc-logo{display:flex;align-items:center;gap:2vw}
 .sc-logo-box{width:7vw;height:7vw;min-width:28px;min-height:28px;border-radius:2vw;background:var(--grad);
   display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:3.5vw;color:#fff}
-.sc-logo-name{font-family:'Bebas Neue',sans-serif;font-size:5vw;letter-spacing:0.3em;
-  background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sc-logo-name{font-family:'Bebas Neue',sans-serif;font-size:8vw;letter-spacing:0.35em;
+  background:var(--grad2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 12px rgba(191,90,242,0.5))}
 .sc-dt{font-size:3vw;color:var(--muted)}
 .sc-avatar{width:22vw;height:22vw;border-radius:50%;margin:0 auto 3vw;
   background:linear-gradient(135deg,rgba(191,90,242,0.3),rgba(255,55,95,0.2));
@@ -340,3 +346,22 @@ html,body{
 .screen-result{padding:0;overflow-y:auto}
 .screen-share{padding:0}
 .screen-tracking,.screen-battle{padding:0;overflow-y:auto}
+
+/* ─── PROFILE SETUP ─── */
+.screen-profile{padding:0 6vw}
+.profile-content{flex:1;display:flex;flex-direction:column;justify-content:center;gap:4vw;min-height:0}
+.profile-title{font-family:'Bebas Neue',sans-serif;font-size:8vw;letter-spacing:0.04em;line-height:1.1}
+.profile-sub{font-size:3.8vw;color:var(--muted);margin-bottom:2vw}
+.profile-field{display:flex;flex-direction:column;gap:1.5vw}
+.profile-label{font-size:3.2vw;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase}
+.profile-input{width:100%;padding:4vw;border-radius:4vw;border:1px solid var(--border);
+  background:rgba(255,255,255,0.04);color:var(--text);font-family:'Outfit',sans-serif;font-size:4.2vw;outline:none}
+.profile-input:focus{border-color:rgba(191,90,242,0.5);box-shadow:0 0 0 2px rgba(191,90,242,0.15)}
+
+/* ─── TIPS MODAL ─── */
+.tips-modal{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;
+  display:flex;align-items:center;justify-content:center;padding:6vw}
+.tips-modal-inner{background:var(--card);border:1px solid var(--border);border-radius:6vw;
+  padding:6vw;width:100%;max-width:420px;display:flex;flex-direction:column;gap:3vw}
+.tips-modal-title{font-family:'Bebas Neue',sans-serif;font-size:6vw;letter-spacing:0.05em;text-align:center;margin-bottom:1vw}
+.tips-modal-inner .btn{margin-top:2vw}

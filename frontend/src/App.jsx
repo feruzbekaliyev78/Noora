@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Splash from './screens/Splash'
+import ProfileSetup from './screens/ProfileSetup'
 import Onboarding from './screens/Onboarding'
 import Camera from './screens/Camera'
 import Analyzing from './screens/Analyzing'
@@ -14,6 +15,7 @@ export default function App() {
     <>
       <Routes>
         <Route path="/" element={<Splash />} />
+        <Route path="/profile" element={<ProfileSetup />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/camera" element={<Camera />} />
         <Route path="/analyzing" element={<Analyzing />} />

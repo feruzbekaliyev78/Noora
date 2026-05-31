@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useI18n } from '../context/I18nContext'
 import { useApp } from '../context/AppContext'
 import LangToggle from '../components/LangToggle'
+import ScreenHeader from '../components/ScreenHeader'
 import { createRipple } from '../utils/ripple'
 import { requestCameraStream } from '../hooks/useCamera'
 
@@ -29,10 +30,11 @@ export default function Onboarding() {
       <div className="b1 blob" />
       <div className="b2 blob" />
       <div className="safe-top" />
+      <ScreenHeader title="" fallback="/profile" />
       <div className="ob-content">
         <div className="ob-logo">
           <div className="ob-icon">N</div>
-          <div className="ob-name">NOORA</div>
+          <div className="ob-name">OORA</div>
         </div>
         <div className="ob-hl">
           {t('onboardingTitle1')}<br />
@@ -54,7 +56,7 @@ export default function Onboarding() {
           <div className="dot" />
         </div>
         <button className="btn" type="button" onClick={handleStart}>{t('startAnalysis')}</button>
-        <button className="btn-g" type="button">{t('hasAccount')}</button>
+        <button className="btn-g" type="button" onClick={() => navigate('/profile')}>{t('hasAccount')}</button>
       </div>
       <div className="safe-bot" />
     </div>

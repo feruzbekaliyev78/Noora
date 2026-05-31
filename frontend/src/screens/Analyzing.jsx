@@ -4,6 +4,7 @@ import { useApp } from '../context/AppContext'
 import { useI18n } from '../context/I18nContext'
 import { analyzeSkin } from '../services/api'
 import { saveAnalysis } from '../services/firebase'
+import ScreenHeader from '../components/ScreenHeader'
 
 const STEPS = ['step1', 'step2', 'step3', 'step4', 'step5']
 const MIN_ANIMATION_MS = 3600
@@ -11,7 +12,7 @@ const MIN_ANIMATION_MS = 3600
 export default function Analyzing() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { capturedImage, setCapturedImage, setAnalysis, addToHistory, userId, showToast } = useApp()
+  const { capturedImage, setCapturedImage, setAnalysis, addToHistory, userId, profile, showToast } = useApp()
   const { t } = useI18n()
   const [activeStep, setActiveStep] = useState(-1)
   const [doneSteps, setDoneSteps] = useState([])
@@ -45,8 +46,14 @@ export default function Analyzing() {
     const minDelay = new Promise(resolve => setTimeout(resolve, MIN_ANIMATION_MS))
     const analysisPromise = analyzeSkin(image)
       .then(data => {
-        saveAnalysis(userId, { ...data, image }).catch(() => {})
-        return data
+        const realAge = profile.age ?? null
+        const enriched = {
+          ...data,
+          realAge,
+          ageDiff: realAge != null ? realAge - data.skinAge : null
+        }
+        saveAnalysis(userId, { ...enriched, image }).catch(() => {})
+        return enriched
       })
       .catch(err => {
         console.error(err)
@@ -66,15 +73,15 @@ export default function Analyzing() {
     })
 
     return () => { cancelled = true }
-  }, [image, capturedImage, navigate, setCapturedImage, setAnalysis, addToHistory, userId, showToast, t])
+  }, [image, capturedImage, navigate, setCapturedImage, setAnalysis, addToHistory, userId, profile.age, showToast, t])
 
   return (
     <div className="screen-page screen-analyzing">
       <div className="b1 blob" />
       <div className="b2 blob" />
       <div className="safe-top" />
+      <ScreenHeader fallback="/camera" />
       <div className="az-title" style={{ whiteSpace: 'pre-line' }}>{t('analyzingTitle')}</div>
-      <div className="az-sub">{t('analyzingSub')}</div>
       <div className="az-ring">
         <svg width="100%" height="100%" viewBox="0 0 160 160">
           <circle cx="80" cy="80" r="70" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />

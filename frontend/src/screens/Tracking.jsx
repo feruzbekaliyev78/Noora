@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { useI18n } from '../context/I18nContext'
 import TabBar from '../components/TabBar'
+import ScreenHeader from '../components/ScreenHeader'
 
 const WEEK_LABELS = ['1', '2', '3', '4', '5', '6']
 
@@ -25,6 +26,7 @@ export default function Tracking() {
       <div style={{ flex: 1, overflowY: 'auto' }}>
         <div className="tr-scroll">
           <div className="safe-top" />
+          <ScreenHeader title={t('trackingTitle')} fallback="/result" />
           <div className="tr-title">{t('trackingTitle')}</div>
           <div className="tr-sub">{t('trackingSub')}</div>
           <div className="tr-chart">

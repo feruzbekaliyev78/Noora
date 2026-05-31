@@ -4,6 +4,7 @@ import { useApp } from '../context/AppContext'
 import { useI18n } from '../context/I18nContext'
 import { getScoreLabel, formatPores, formatTexture } from '../i18n/translations'
 import { generateShareCard, shareCardImage } from '../utils/generateShareCard'
+import ScreenHeader from '../components/ScreenHeader'
 import { createRipple } from '../utils/ripple'
 
 export default function ShareCard() {
@@ -17,24 +18,24 @@ export default function ShareCard() {
       navigate('/result')
       return
     }
-    generateShareCard(analysis, profile, capturedImage).then(setCardUrl)
-  }, [analysis, capturedImage, profile, navigate])
+    generateShareCard(analysis, profile, capturedImage, lang).then(setCardUrl)
+  }, [analysis, capturedImage, profile, lang, navigate])
 
   if (!analysis) return null
 
-  const ageDiff = analysis.realAge ? analysis.realAge - analysis.skinAge : 6
+  const ageDiff = analysis.ageDiff ?? (analysis.realAge != null ? analysis.realAge - analysis.skinAge : null)
   const date = new Date().toLocaleDateString(lang === 'ru' ? 'ru-RU' : 'uz-UZ')
   const dashOffset = 182.2 - (analysis.skinScore / 100) * 182.2
 
   const handleShare = async (e) => {
     createRipple(e.currentTarget, e)
-    const url = cardUrl || await generateShareCard(analysis, profile, capturedImage)
-    await shareCardImage(url, analysis.skinScore)
+    const url = cardUrl || await generateShareCard(analysis, profile, capturedImage, lang)
+    await shareCardImage(url, analysis.skinScore, lang)
     showToast(t('cardReady'))
   }
 
   const handleDownload = async () => {
-    const url = cardUrl || await generateShareCard(analysis, profile, capturedImage)
+    const url = cardUrl || await generateShareCard(analysis, profile, capturedImage, lang)
     const a = document.createElement('a')
     a.href = url
     a.download = 'noora-skin.jpg'
@@ -49,10 +50,11 @@ export default function ShareCard() {
         <div className="sc-b1" />
         <div className="sc-b2" />
         <div className="safe-top" />
+        <ScreenHeader title={t('shareCard')} fallback="/result" />
         <div className="sc-hdr">
           <div className="sc-logo">
             <div className="sc-logo-box">N</div>
-            <div className="sc-logo-name">NOORA</div>
+            <div className="sc-logo-name">OORA</div>
           </div>
           <div className="sc-dt">{date}</div>
         </div>
@@ -61,7 +63,7 @@ export default function ShareCard() {
             <img src={capturedImage} alt="" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
           ) : '👤'}
         </div>
-        <div className="sc-name"><strong>{profile.name}</strong> · {profile.city}</div>
+        <div className="sc-name"><strong>{profile.name}</strong></div>
         <div className="sc-score-row">
           <div style={{ position: 'relative', width: '18vw', height: '18vw' }}>
             <svg width="100%" height="100%" viewBox="0 0 70 70" style={{ transform: 'rotate(-90deg)' }}>
@@ -78,19 +80,20 @@ export default function ShareCard() {
           </div>
           <div className="sc-big">{analysis.skinScore}</div>
           <div className="sc-score-info">
-            <div className="sci-l">SKIN SCORE</div>
+            <div className="sci-l">{t('skinScore')}</div>
             <div className="sci-v">{getScoreLabel(analysis.skinScore, lang).replace('✦ ', '')}</div>
           </div>
         </div>
         <div className="sc-age-tag">
           {t('skinAgeLabel')}: <strong>{analysis.skinAge} {t('years')}</strong>
-          {ageDiff > 0 && ` — ${t('lookYounger', { n: ageDiff })}`}
+          {ageDiff != null && ageDiff > 0 && ` — ${t('lookYounger', { n: ageDiff })}`}
+          {ageDiff != null && ageDiff <= 0 && ` — ${t('skinNeedsCare')}`}
         </div>
         <div className="sc-stats">
           <div className="sc-stat"><div className="sc-sv">{analysis.hydration}%</div><div className="sc-sk">{t('hydration').slice(0, 5)}</div></div>
           <div className="sc-stat"><div className="sc-sv">{analysis.tone}%</div><div className="sc-sk">{t('tone').slice(0, 3)}</div></div>
-          <div className="sc-stat"><div className="sc-sv">{formatPores(analysis.pores)}</div><div className="sc-sk">{t('pores').slice(0, 4)}</div></div>
-          <div className="sc-stat"><div className="sc-sv">{formatTexture(analysis.texture).slice(0, 3)}</div><div className="sc-sk">{t('texture').slice(0, 4)}</div></div>
+          <div className="sc-stat"><div className="sc-sv">{formatPores(analysis.pores, lang)}</div><div className="sc-sk">{t('pores').slice(0, 4)}</div></div>
+          <div className="sc-stat"><div className="sc-sv">{formatTexture(analysis.texture, lang).slice(0, 5)}</div><div className="sc-sk">{t('texture').slice(0, 4)}</div></div>
         </div>
         <div className="sc-cta">{t('checkSkin')} <span>noora.uz</span></div>
       </div>

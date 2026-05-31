@@ -11,18 +11,46 @@ function getUserId() {
   return id
 }
 
+function loadProfile() {
+  try {
+    const raw = localStorage.getItem('noora-profile')
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      return {
+        name: parsed.name || '',
+        age: parsed.age ? Number(parsed.age) : null
+      }
+    }
+  } catch {
+    // ignore
+  }
+  return { name: '', age: null }
+}
+
+export function isProfileComplete(profile) {
+  return Boolean(profile?.name?.trim() && profile?.age > 0)
+}
+
 export function AppProvider({ children }) {
   const [capturedImage, setCapturedImage] = useState(null)
   const [analysis, setAnalysis] = useState(null)
   const [history, setHistory] = useState([])
   const [userId] = useState(getUserId)
-  const [profile] = useState({ name: 'Малика', city: 'Ташкент' })
+  const [profile, setProfileState] = useState(loadProfile)
   const [toast, setToast] = useState(null)
   const cameraStreamRef = useRef(null)
 
   const showToast = useCallback((msg) => {
     setToast(msg)
     setTimeout(() => setToast(null), 2800)
+  }, [])
+
+  const setProfile = useCallback((next) => {
+    setProfileState(prev => {
+      const updated = typeof next === 'function' ? next(prev) : next
+      localStorage.setItem('noora-profile', JSON.stringify(updated))
+      return updated
+    })
   }, [])
 
   const addToHistory = useCallback((data) => {
@@ -44,7 +72,7 @@ export function AppProvider({ children }) {
       capturedImage, setCapturedImage,
       analysis, setAnalysis,
       history, addToHistory,
-      userId, profile,
+      userId, profile, setProfile,
       toast, showToast,
       setCameraStream, takeCameraStream
     }}>

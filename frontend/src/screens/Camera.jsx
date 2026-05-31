@@ -3,15 +3,17 @@ import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { useI18n } from '../context/I18nContext'
 import { captureFromVideo } from '../utils/image'
+import { analyzeFrame } from '../utils/frameValidator'
+import ScreenHeader from '../components/ScreenHeader'
 
-async function getCameraStream() {
+async function getCameraStream(facingMode = 'user') {
   if (!navigator.mediaDevices?.getUserMedia) {
     throw new Error('Camera API unavailable')
   }
 
   const attempts = [
-    { video: { facingMode: { ideal: 'user' } }, audio: false },
-    { video: { facingMode: 'user' }, audio: false },
+    { video: { facingMode: { ideal: facingMode } }, audio: false },
+    { video: { facingMode }, audio: false },
     { video: true, audio: false }
   ]
 
@@ -38,11 +40,9 @@ async function playVideoElement(video) {
   }
 
   await new Promise((resolve, reject) => {
-    const onReady = () => {
-      video.removeEventListener('loadedmetadata', onReady)
+    video.addEventListener('loadedmetadata', () => {
       video.play().then(resolve).catch(reject)
-    }
-    video.addEventListener('loadedmetadata', onReady, { once: true })
+    }, { once: true })
   })
 }
 
@@ -52,11 +52,17 @@ export default function Camera() {
   const { t } = useI18n()
 
   const videoRef = useRef(null)
+  const fileRef = useRef(null)
   const streamRef = useRef(null)
+  const facingRef = useRef('user')
+
   const [ready, setReady] = useState(false)
-  const [faceReady, setFaceReady] = useState(false)
   const [flash, setFlash] = useState(false)
   const [capturing, setCapturing] = useState(false)
+  const [showTips, setShowTips] = useState(false)
+  const [validation, setValidation] = useState({ lightOk: false, faceOk: false })
+
+  const canSnap = ready && validation.lightOk && validation.faceOk && !capturing
 
   const attachStream = useCallback(async (stream) => {
     const video = videoRef.current
@@ -81,22 +87,23 @@ export default function Camera() {
     streamRef.current = null
 
     const video = videoRef.current
-    if (video) {
-      video.srcObject = null
-    }
+    if (video) video.srcObject = null
 
     setReady(false)
+    setValidation({ lightOk: false, faceOk: false })
   }, [])
 
-  const startCamera = useCallback(async () => {
+  const startCamera = useCallback(async (facingMode = facingRef.current) => {
+    stopCamera()
+    facingRef.current = facingMode
     try {
-      const stream = await getCameraStream()
+      const stream = await getCameraStream(facingMode)
       await attachStream(stream)
     } catch (err) {
       console.error('getUserMedia failed:', err)
       showToast(t('cameraError'))
     }
-  }, [attachStream, showToast, t])
+  }, [attachStream, stopCamera, showToast, t])
 
   const bindVideoRef = useCallback((node) => {
     videoRef.current = node
@@ -105,80 +112,103 @@ export default function Camera() {
     }
   }, [attachStream])
 
+  const flipCamera = () => {
+    const next = facingRef.current === 'user' ? 'environment' : 'user'
+    startCamera(next)
+  }
+
+  const openGallery = () => {
+    fileRef.current?.click()
+  }
+
+  const handleGallery = (e) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      const image = reader.result
+      setCapturedImage(image)
+      stopCamera()
+      navigate('/analyzing', { state: { capturedImage: image } })
+    }
+    reader.onerror = () => showToast(t('galleryError'))
+    reader.readAsDataURL(file)
+  }
+
   useEffect(() => {
     const pendingStream = takeCameraStream()
     if (pendingStream) {
       streamRef.current = pendingStream
-      if (videoRef.current) {
-        attachStream(pendingStream)
-      }
+      if (videoRef.current) attachStream(pendingStream)
     } else {
-      startCamera()
+      startCamera('user')
     }
 
-    const timer = setTimeout(() => setFaceReady(true), 1500)
-
-    return () => {
-      clearTimeout(timer)
-      stopCamera()
-    }
+    return () => stopCamera()
   }, [takeCameraStream, attachStream, startCamera, stopCamera])
 
+  useEffect(() => {
+    if (!ready) return undefined
+
+    const interval = setInterval(() => {
+      const video = videoRef.current
+      if (!video?.videoWidth) return
+      setValidation(analyzeFrame(video))
+    }, 500)
+
+    return () => clearInterval(interval)
+  }, [ready])
+
   const snap = () => {
-    if (capturing || !videoRef.current) return
+    if (!canSnap || !videoRef.current) return
 
     const video = videoRef.current
-    if (!ready || !video.videoWidth) {
-      showToast(t('cameraError'))
-      return
-    }
-
     setCapturing(true)
-    setFaceReady(true)
     setFlash(true)
     setTimeout(() => setFlash(false), 400)
 
     const image = captureFromVideo(video)
     setCapturedImage(image)
     stopCamera()
-
     navigate('/analyzing', { state: { capturedImage: image } })
   }
 
   return (
     <div className="screen-page">
+      <input ref={fileRef} type="file" accept="image/*" hidden onChange={handleGallery} />
       <div className="b3 blob" />
       <div className="safe-top" />
       <div className="cam-wrap">
-        <div className="topbar">
-          <div className="icon-btn" onClick={() => { stopCamera(); navigate('/onboarding') }}>←</div>
-          <div className="topbar-title">{t('scanning')}</div>
-          <div className="icon-btn">ℹ</div>
-        </div>
+        <ScreenHeader
+          title={t('scanning')}
+          fallback="/onboarding"
+          onBack={() => { stopCamera(); navigate('/onboarding') }}
+          right={<div className="icon-btn" onClick={() => setShowTips(true)}>ℹ</div>}
+        />
         <div className="vf">
-          <video
-            ref={bindVideoRef}
-            className="cam-video"
-            playsInline
-            muted
-            autoPlay
-          />
+          <video ref={bindVideoRef} className="cam-video" playsInline muted autoPlay />
           {!ready && (
             <div className="cam-loading-overlay" aria-hidden="true">
               <div className="cam-video-placeholder">👤</div>
-              <div className={`oval ${faceReady ? 'ready' : ''}`}>
+              <div className="oval">
                 👤
                 <div className="beam" />
               </div>
             </div>
           )}
-          <div className={`vfc tl ${faceReady ? 'ready' : ''}`} />
-          <div className={`vfc tr ${faceReady ? 'ready' : ''}`} />
-          <div className={`vfc bl ${faceReady ? 'ready' : ''}`} />
-          <div className={`vfc br ${faceReady ? 'ready' : ''}`} />
+          <div className={`vfc tl ${validation.faceOk ? 'ready' : ''}`} />
+          <div className={`vfc tr ${validation.faceOk ? 'ready' : ''}`} />
+          <div className={`vfc bl ${validation.faceOk ? 'ready' : ''}`} />
+          <div className={`vfc br ${validation.faceOk ? 'ready' : ''}`} />
           <div className="chips">
-            <div className="chip ok"><div className="chip-dot" />{t('lightOk')}</div>
-            <div className="chip warn"><div className="chip-dot" />{t('closer')}</div>
+            <div className={`chip ${validation.lightOk ? 'ok' : 'bad'}`}>
+              <div className="chip-dot" />💡 {validation.lightOk ? t('lightGood') : t('lightBad')}
+            </div>
+            <div className={`chip ${validation.faceOk ? 'ok' : 'bad'}`}>
+              <div className="chip-dot" />👁 {validation.faceOk ? t('faceGood') : t('faceBad')}
+            </div>
           </div>
         </div>
         <div className="tips">
@@ -188,13 +218,25 @@ export default function Camera() {
           <div className="tip"><div className="tip-ico">✂️</div>{t('tipHair')}</div>
         </div>
         <div className="shutter-row">
-          <div className="shutter-side">🖼</div>
-          <div className="shutter" onClick={snap}>📸</div>
-          <div className="shutter-side" onClick={startCamera}>🔄</div>
+          <div className="shutter-side" onClick={openGallery}>🖼</div>
+          <div className={`shutter ${canSnap ? '' : 'disabled'}`} onClick={snap}>📸</div>
+          <div className="shutter-side" onClick={flipCamera}>🔄</div>
         </div>
       </div>
       <div className="safe-bot" />
       <div className={`flash ${flash ? 'go' : ''}`} />
+      {showTips && (
+        <div className="tips-modal" onClick={() => setShowTips(false)}>
+          <div className="tips-modal-inner" onClick={(e) => e.stopPropagation()}>
+            <div className="tips-modal-title">{t('tipsTitle')}</div>
+            <div className="tip"><div className="tip-ico">💡</div>{t('tipLight')}</div>
+            <div className="tip"><div className="tip-ico">🚫</div>{t('tipNoMakeup')}</div>
+            <div className="tip"><div className="tip-ico">👁</div>{t('tipLook')}</div>
+            <div className="tip"><div className="tip-ico">✂️</div>{t('tipHair')}</div>
+            <button className="btn" type="button" onClick={() => setShowTips(false)}>OK</button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

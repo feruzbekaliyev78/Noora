@@ -2,11 +2,12 @@ import { useMemo } from 'react'
 import { useApp } from '../context/AppContext'
 import { useI18n } from '../context/I18nContext'
 import TabBar from '../components/TabBar'
+import ScreenHeader from '../components/ScreenHeader'
 import { createRipple } from '../utils/ripple'
 
 export default function Battle() {
-  const { analysis, showToast } = useApp()
-  const { t, lang } = useI18n()
+  const { analysis, profile, showToast } = useApp()
+  const { t } = useI18n()
 
   const friendScore = useMemo(
     () => (analysis ? Math.max(40, analysis.skinScore - 8 + Math.floor(Math.random() * 16)) : 75),
@@ -25,6 +26,7 @@ export default function Battle() {
       <div style={{ flex: 1, overflowY: 'auto' }}>
         <div className="bt-scroll">
           <div className="safe-top" />
+          <ScreenHeader title={t('battleTitle')} fallback="/result" />
           <div className="bt-title">{t('battleTitle')}</div>
           <div className="bt-sub">{t('battleSub')}</div>
           <div className="bt-avatars">
@@ -37,15 +39,12 @@ export default function Battle() {
           {analysis && (
             <>
               <div className="bt-nom">
-                {youWin ? (
-                  <>👑 <strong>{t('winner')}</strong> — Skin Score {analysis.skinScore} vs {friendScore}</>
-                ) : (
-                  <>Skin Score {analysis.skinScore} vs {friendScore}</>
-                )}
+                {youWin
+                  ? t('battleWinner', { name: profile.name, you: analysis.skinScore, friend: friendScore })
+                  : t('battleScoreLine', { you: analysis.skinScore, friend: friendScore })}
               </div>
               <div className="bt-nom">
-                💧 {lang === 'ru' ? 'У тебя увлажнение лучше' : 'Sening namliging yaxshiroq'},
-                {' '}{lang === 'ru' ? 'у подруги тон ровнее' : 'do\'stingda tonus tekisroq'}
+                💧 {t('battleHydrationBetter')}, {t('battleToneBetter')}
               </div>
             </>
           )}
