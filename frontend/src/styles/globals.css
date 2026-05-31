@@ -250,6 +250,11 @@ html,body{
 .zone-bottom{bottom:8%;left:50%;transform:translateX(-50%)}
 
 /* ─── SHARE CARD ─── */
+.share-preview-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:3vw 4vw;min-height:0;overflow:hidden}
+.share-preview-loading{font-size:4vw;color:var(--muted)}
+.share-preview-img{width:100%;max-height:72vh;object-fit:contain;border-radius:4vw;
+  box-shadow:0 4vw 12vw rgba(0,0,0,0.45)}
+.screen-share{display:flex;flex-direction:column;background:#06030f}
 #s-share{padding:0}
 .sc-inner{flex:1;display:flex;flex-direction:column;
   background:linear-gradient(165deg,#12062a 0%,#200838 30%,#160620 65%,#080412 100%);

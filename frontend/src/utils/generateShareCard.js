@@ -1,29 +1,83 @@
 import { getShareLabels } from '../i18n/translations'
 
+const PHOTO_HEIGHT = Math.round(1920 * 0.65)
+
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => resolve(img)
+    img.onerror = reject
+    img.src = src
+  })
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath()
+  ctx.moveTo(x + r, y)
+  ctx.lineTo(x + w - r, y)
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r)
+  ctx.lineTo(x + w, y + h - r)
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h)
+  ctx.lineTo(x + r, y + h)
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r)
+  ctx.lineTo(x, y + r)
+  ctx.quadraticCurveTo(x, y, x + r, y)
+  ctx.closePath()
+}
+
+function drawCoverPhoto(ctx, img, width, height) {
+  const scale = Math.max(width / img.width, height / img.height)
+  const sw = width / scale
+  const sh = height / scale
+  const sx = (img.width - sw) / 2
+  const sy = (img.height - sh) / 2
+  ctx.drawImage(img, sx, sy, sw, sh, 0, 0, width, height)
+}
+
+function getProfileName(profile, data) {
+  return (profile?.name?.trim() || data?.userName?.trim() || 'NOORA')
+}
+
+async function ensureFonts() {
+  if (!document.fonts?.load) return
+  await Promise.all([
+    document.fonts.load('bold 48px "Bebas Neue"'),
+    document.fonts.load('bold 52px "Bebas Neue"'),
+    document.fonts.load('bold 240px "Bebas Neue"'),
+    document.fonts.load('bold 52px "Outfit"'),
+    document.fonts.load('36px "Outfit"'),
+    document.fonts.load('38px "Outfit"'),
+    document.fonts.load('bold 40px "Outfit"')
+  ])
+}
+
 export async function generateShareCard(data, profile, userPhoto) {
+  await ensureFonts()
+
   const canvas = document.createElement('canvas')
   canvas.width = 1080
   canvas.height = 1920
   const ctx = canvas.getContext('2d')
 
-  const bgGrad = ctx.createLinearGradient(0, 0, 1080, 1920)
-  bgGrad.addColorStop(0, '#1a0d2e')
-  bgGrad.addColorStop(0.5, '#120820')
+  const bgGrad = ctx.createLinearGradient(0, PHOTO_HEIGHT, 0, 1920)
+  bgGrad.addColorStop(0, '#120820')
+  bgGrad.addColorStop(0.5, '#0a0518')
   bgGrad.addColorStop(1, '#06030f')
   ctx.fillStyle = bgGrad
-  ctx.fillRect(0, 0, 1080, 1920)
+  ctx.fillRect(0, PHOTO_HEIGHT, 1080, 1920 - PHOTO_HEIGHT)
 
   if (userPhoto) {
-    const img = new Image()
-    img.src = userPhoto
-    await new Promise(r => { img.onload = r })
-    ctx.drawImage(img, 0, 0, 1080, 1248)
+    const img = await loadImage(userPhoto)
+    drawCoverPhoto(ctx, img, 1080, PHOTO_HEIGHT)
 
-    const fadeGrad = ctx.createLinearGradient(0, 800, 0, 1248)
+    const fadeGrad = ctx.createLinearGradient(0, PHOTO_HEIGHT - 400, 0, PHOTO_HEIGHT)
     fadeGrad.addColorStop(0, 'rgba(6,3,15,0)')
     fadeGrad.addColorStop(1, 'rgba(6,3,15,1)')
     ctx.fillStyle = fadeGrad
-    ctx.fillRect(0, 800, 1080, 448)
+    ctx.fillRect(0, PHOTO_HEIGHT - 400, 1080, 400)
+  } else {
+    ctx.fillStyle = '#1a0d2e'
+    ctx.fillRect(0, 0, 1080, PHOTO_HEIGHT)
   }
 
   const logoGrad = ctx.createLinearGradient(60, 60, 160, 140)
@@ -46,19 +100,15 @@ export async function generateShareCard(data, profile, userPhoto) {
   ctx.textAlign = 'left'
   ctx.fillText('OORA', 165, 118)
 
-  const userName = profile?.name || data.userName || 'Малика'
-  const userAge = profile?.age ?? data.userAge ?? 25
+  const userName = getProfileName(profile, data)
+  const userAge = profile?.age ?? data?.userAge ?? 25
 
   ctx.fillStyle = 'white'
   ctx.font = 'bold 52px "Outfit", sans-serif'
   ctx.textAlign = 'left'
   ctx.fillText(userName, 60, 1320)
 
-  ctx.fillStyle = 'rgba(255,255,255,0.45)'
-  ctx.font = '36px "Outfit", sans-serif'
-  ctx.fillText('· Ташкент', 60 + ctx.measureText(userName).width + 20, 1320)
-
-  const scoreGrad = ctx.createLinearGradient(60, 1350, 400, 1550)
+  const scoreGrad = ctx.createLinearGradient(60, 1350, 500, 1550)
   scoreGrad.addColorStop(0, '#9B59FF')
   scoreGrad.addColorStop(0.5, '#BF5AF2')
   scoreGrad.addColorStop(1, '#FF375F')
@@ -85,7 +135,7 @@ export async function generateShareCard(data, profile, userPhoto) {
     : `Возраст кожи: ${data.skinAge} лет`
   ctx.fillText(ageText, 540, 1700)
 
-  const ctaGrad = ctx.createLinearGradient(0, 0, 500, 0)
+  const ctaGrad = ctx.createLinearGradient(290, 0, 790, 0)
   ctaGrad.addColorStop(0, '#BF5AF2')
   ctaGrad.addColorStop(1, '#FF375F')
   ctx.fillStyle = ctaGrad
@@ -94,20 +144,6 @@ export async function generateShareCard(data, profile, userPhoto) {
   ctx.fillText('Проверь свою кожу → noora.uz', 540, 1860)
 
   return canvas.toDataURL('image/jpeg', 0.92)
-}
-
-function roundRect(ctx, x, y, w, h, r) {
-  ctx.beginPath()
-  ctx.moveTo(x + r, y)
-  ctx.lineTo(x + w - r, y)
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r)
-  ctx.lineTo(x + w, y + h - r)
-  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h)
-  ctx.lineTo(x + r, y + h)
-  ctx.quadraticCurveTo(x, y + h, x, y + h - r)
-  ctx.lineTo(x, y + r)
-  ctx.quadraticCurveTo(x, y, x + r, y)
-  ctx.closePath()
 }
 
 export async function shareCardImage(imageDataUrl, skinScore, lang = 'ru') {
