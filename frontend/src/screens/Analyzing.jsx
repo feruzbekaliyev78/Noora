@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState, useRef } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { useI18n } from '../context/I18nContext'
 import { analyzeSkin } from '../services/api'
@@ -10,15 +10,25 @@ const MIN_ANIMATION_MS = 3600
 
 export default function Analyzing() {
   const navigate = useNavigate()
-  const { capturedImage, setAnalysis, addToHistory, userId, showToast } = useApp()
+  const location = useLocation()
+  const { capturedImage, setCapturedImage, setAnalysis, addToHistory, userId, showToast } = useApp()
   const { t } = useI18n()
   const [activeStep, setActiveStep] = useState(-1)
   const [doneSteps, setDoneSteps] = useState([])
+  const startedRef = useRef(false)
+
+  const image = capturedImage || location.state?.capturedImage
 
   useEffect(() => {
-    if (!capturedImage) {
-      navigate('/camera')
+    if (!image) {
+      navigate('/camera', { replace: true })
       return
+    }
+    if (startedRef.current) return
+    startedRef.current = true
+
+    if (!capturedImage) {
+      setCapturedImage(image)
     }
 
     let cancelled = false
@@ -33,9 +43,9 @@ export default function Analyzing() {
     })
 
     const minDelay = new Promise(resolve => setTimeout(resolve, MIN_ANIMATION_MS))
-    const analysisPromise = analyzeSkin(capturedImage)
+    const analysisPromise = analyzeSkin(image)
       .then(data => {
-        saveAnalysis(userId, { ...data, image: capturedImage }).catch(() => {})
+        saveAnalysis(userId, { ...data, image }).catch(() => {})
         return data
       })
       .catch(err => {
@@ -56,7 +66,7 @@ export default function Analyzing() {
     })
 
     return () => { cancelled = true }
-  }, [capturedImage, navigate, setAnalysis, addToHistory, userId, showToast, t])
+  }, [image, capturedImage, navigate, setCapturedImage, setAnalysis, addToHistory, userId, showToast, t])
 
   return (
     <div className="screen-page screen-analyzing">

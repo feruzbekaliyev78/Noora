@@ -1,14 +1,25 @@
 import { useNavigate } from 'react-router-dom'
 import { useI18n } from '../context/I18nContext'
+import { useApp } from '../context/AppContext'
 import LangToggle from '../components/LangToggle'
 import { createRipple } from '../utils/ripple'
+import { requestCameraStream } from '../hooks/useCamera'
 
 export default function Onboarding() {
   const navigate = useNavigate()
   const { t } = useI18n()
+  const { setCameraStream, showToast } = useApp()
 
-  const handleStart = (e) => {
+  const handleStart = async (e) => {
     createRipple(e.currentTarget, e)
+
+    try {
+      const stream = await requestCameraStream()
+      setCameraStream(stream)
+    } catch {
+      showToast(t('cameraError'))
+    }
+
     navigate('/camera')
   }
 
@@ -18,7 +29,7 @@ export default function Onboarding() {
       <div className="b1 blob" />
       <div className="b2 blob" />
       <div className="safe-top" />
-      <div style={{ padding: '0 6vw', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+      <div className="ob-content">
         <div className="ob-logo">
           <div className="ob-icon">N</div>
           <div className="ob-name">NOORA</div>
@@ -42,7 +53,7 @@ export default function Onboarding() {
           <div className="dot" />
           <div className="dot" />
         </div>
-        <button className="btn" onClick={handleStart}>{t('startAnalysis')}</button>
+        <button className="btn" type="button" onClick={handleStart}>{t('startAnalysis')}</button>
         <button className="btn-g" type="button">{t('hasAccount')}</button>
       </div>
       <div className="safe-bot" />

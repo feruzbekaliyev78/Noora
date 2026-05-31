@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback } from 'react'
+import { createContext, useContext, useState, useCallback, useRef } from 'react'
 
 const AppContext = createContext(null)
 
@@ -18,6 +18,7 @@ export function AppProvider({ children }) {
   const [userId] = useState(getUserId)
   const [profile] = useState({ name: 'Малика', city: 'Ташкент' })
   const [toast, setToast] = useState(null)
+  const cameraStreamRef = useRef(null)
 
   const showToast = useCallback((msg) => {
     setToast(msg)
@@ -28,13 +29,24 @@ export function AppProvider({ children }) {
     setHistory(prev => [{ ...data, createdAt: new Date() }, ...prev].slice(0, 10))
   }, [])
 
+  const setCameraStream = useCallback((stream) => {
+    cameraStreamRef.current = stream
+  }, [])
+
+  const takeCameraStream = useCallback(() => {
+    const stream = cameraStreamRef.current
+    cameraStreamRef.current = null
+    return stream
+  }, [])
+
   return (
     <AppContext.Provider value={{
       capturedImage, setCapturedImage,
       analysis, setAnalysis,
       history, addToHistory,
       userId, profile,
-      toast, showToast
+      toast, showToast,
+      setCameraStream, takeCameraStream
     }}>
       {children}
     </AppContext.Provider>

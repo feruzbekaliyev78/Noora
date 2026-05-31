@@ -1,36 +1,84 @@
 import { useRef, useEffect, useCallback, useState } from 'react'
 
-export function useCamera() {
+function getVideoConstraints() {
+  return {
+    video: {
+      facingMode: { ideal: 'user' },
+      width: { ideal: 1280 },
+      height: { ideal: 720 }
+    },
+    audio: false
+  }
+}
+
+export function useCamera(initialStream = null) {
   const videoRef = useRef(null)
-  const streamRef = useRef(null)
+  const streamRef = useRef(initialStream)
   const [ready, setReady] = useState(false)
   const [error, setError] = useState(null)
 
-  const start = useCallback(async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'user', width: { ideal: 1080 }, height: { ideal: 1080 } }
-      })
-      streamRef.current = stream
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        await videoRef.current.play()
-        setReady(true)
-      }
-    } catch (err) {
-      setError(err.message)
-    }
+  const attachStream = useCallback(async (stream) => {
+    if (!stream || !videoRef.current) return false
+
+    streamRef.current = stream
+    const video = videoRef.current
+    video.srcObject = stream
+    video.setAttribute('playsinline', 'true')
+    video.muted = true
+
+    await video.play()
+    setReady(true)
+    setError(null)
+    return true
   }, [])
+
+  const start = useCallback(async () => {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setError('Camera API unavailable')
+      return
+    }
+
+    try {
+      setError(null)
+      const stream = await navigator.mediaDevices.getUserMedia(getVideoConstraints())
+      await attachStream(stream)
+    } catch (err) {
+      setReady(false)
+      setError(err.message || 'Camera unavailable')
+    }
+  }, [attachStream])
 
   const stop = useCallback(() => {
     streamRef.current?.getTracks().forEach(t => t.stop())
     streamRef.current = null
+    if (videoRef.current) {
+      videoRef.current.srcObject = null
+    }
     setReady(false)
   }, [])
+
+  useEffect(() => {
+    if (initialStream) {
+      attachStream(initialStream)
+    }
+  }, [initialStream, attachStream])
+
+  useEffect(() => {
+    if (streamRef.current && videoRef.current && !ready) {
+      attachStream(streamRef.current)
+    }
+  }, [ready, attachStream])
 
   useEffect(() => {
     return () => stop()
   }, [stop])
 
   return { videoRef, start, stop, ready, error }
+}
+
+export async function requestCameraStream() {
+  if (!navigator.mediaDevices?.getUserMedia) {
+    throw new Error('Camera API unavailable')
+  }
+  return navigator.mediaDevices.getUserMedia(getVideoConstraints())
 }
