@@ -1,102 +1,99 @@
-import { getShareLabels, formatPores, formatTexture } from '../i18n/translations'
+import { getShareLabels } from '../i18n/translations'
 
-export async function generateShareCard(data, profile, capturedImage, lang = 'ru') {
-  const labels = getShareLabels(lang)
+export async function generateShareCard(data, profile, userPhoto) {
   const canvas = document.createElement('canvas')
   canvas.width = 1080
   canvas.height = 1920
   const ctx = canvas.getContext('2d')
 
-  const grad = ctx.createLinearGradient(0, 0, 1080, 1920)
-  grad.addColorStop(0, '#12062a')
-  grad.addColorStop(0.35, '#200838')
-  grad.addColorStop(0.65, '#160620')
-  grad.addColorStop(1, '#080412')
-  ctx.fillStyle = grad
+  const bgGrad = ctx.createLinearGradient(0, 0, 1080, 1920)
+  bgGrad.addColorStop(0, '#1a0d2e')
+  bgGrad.addColorStop(0.5, '#120820')
+  bgGrad.addColorStop(1, '#06030f')
+  ctx.fillStyle = bgGrad
   ctx.fillRect(0, 0, 1080, 1920)
 
-  ctx.strokeStyle = 'rgba(191,90,242,0.05)'
-  ctx.lineWidth = 1
-  for (let x = 0; x < 1080; x += 80) {
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 1920); ctx.stroke()
-  }
-  for (let y = 0; y < 1920; y += 80) {
-    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(1080, y); ctx.stroke()
+  if (userPhoto) {
+    const img = new Image()
+    img.src = userPhoto
+    await new Promise(r => { img.onload = r })
+    ctx.drawImage(img, 0, 0, 1080, 1248)
+
+    const fadeGrad = ctx.createLinearGradient(0, 800, 0, 1248)
+    fadeGrad.addColorStop(0, 'rgba(6,3,15,0)')
+    fadeGrad.addColorStop(1, 'rgba(6,3,15,1)')
+    ctx.fillStyle = fadeGrad
+    ctx.fillRect(0, 800, 1080, 448)
   }
 
-  ctx.textAlign = 'center'
-
-  const logoGrad = ctx.createLinearGradient(200, 60, 880, 160)
+  const logoGrad = ctx.createLinearGradient(60, 60, 160, 140)
   logoGrad.addColorStop(0, '#BF5AF2')
-  logoGrad.addColorStop(0.5, '#FF375F')
-  logoGrad.addColorStop(1, '#FF8FAB')
-  ctx.font = 'bold 140px "Bebas Neue", sans-serif'
+  logoGrad.addColorStop(1, '#FF375F')
   ctx.fillStyle = logoGrad
-  ctx.shadowColor = 'rgba(191,90,242,0.6)'
-  ctx.shadowBlur = 40
-  ctx.fillText('NOORA', 540, 150)
-  ctx.shadowBlur = 0
+  roundRect(ctx, 60, 60, 80, 80, 20)
+  ctx.fill()
 
-  if (capturedImage) {
-    const img = await loadImage(capturedImage)
-    ctx.save()
-    ctx.beginPath()
-    ctx.arc(540, 360, 130, 0, Math.PI * 2)
-    ctx.clip()
-    ctx.drawImage(img, 410, 230, 260, 260)
-    ctx.restore()
-  }
+  ctx.fillStyle = 'white'
+  ctx.font = 'bold 48px "Bebas Neue", sans-serif'
+  ctx.textAlign = 'center'
+  ctx.fillText('N', 100, 118)
 
-  ctx.font = 'bold 44px "Outfit", sans-serif'
-  ctx.fillStyle = '#F5EEFF'
-  ctx.fillText(profile.name || 'NOORA', 540, 540)
+  const textGrad = ctx.createLinearGradient(160, 0, 380, 0)
+  textGrad.addColorStop(0, '#BF5AF2')
+  textGrad.addColorStop(1, '#FF375F')
+  ctx.fillStyle = textGrad
+  ctx.font = 'bold 52px "Bebas Neue", sans-serif'
+  ctx.textAlign = 'left'
+  ctx.fillText('OORA', 165, 118)
 
-  const scoreGrad = ctx.createLinearGradient(300, 700, 780, 700)
+  const userName = profile?.name || data.userName || 'Малика'
+  const userAge = profile?.age ?? data.userAge ?? 25
+
+  ctx.fillStyle = 'white'
+  ctx.font = 'bold 52px "Outfit", sans-serif'
+  ctx.textAlign = 'left'
+  ctx.fillText(userName, 60, 1320)
+
+  ctx.fillStyle = 'rgba(255,255,255,0.45)'
+  ctx.font = '36px "Outfit", sans-serif'
+  ctx.fillText('· Ташкент', 60 + ctx.measureText(userName).width + 20, 1320)
+
+  const scoreGrad = ctx.createLinearGradient(60, 1350, 400, 1550)
   scoreGrad.addColorStop(0, '#9B59FF')
   scoreGrad.addColorStop(0.5, '#BF5AF2')
   scoreGrad.addColorStop(1, '#FF375F')
-  ctx.font = '300px "Bebas Neue", sans-serif'
   ctx.fillStyle = scoreGrad
-  ctx.fillText(String(data.skinScore), 540, 920)
+  ctx.font = 'bold 240px "Bebas Neue", sans-serif'
+  ctx.textAlign = 'left'
+  ctx.fillText(String(data.skinScore), 60, 1570)
 
-  ctx.font = '48px "Outfit", sans-serif'
-  ctx.fillStyle = '#F5EEFF'
-  ctx.fillText(labels.skinAge(data.skinAge), 540, 1120)
+  ctx.fillStyle = 'rgba(255,255,255,0.4)'
+  ctx.font = '36px "Outfit", sans-serif'
+  ctx.fillText('SKIN SCORE', 60, 1620)
 
-  const stats = [
-    `${data.hydration}%`,
-    `${data.tone}%`,
-    formatPores(data.pores, lang),
-    formatTexture(data.texture, lang)
-  ]
+  ctx.fillStyle = 'rgba(255,255,255,0.08)'
+  roundRect(ctx, 60, 1650, 960, 80, 40)
+  ctx.fill()
 
-  stats.forEach((val, i) => {
-    const x = 135 + i * 270
-    ctx.fillStyle = 'rgba(255,255,255,0.04)'
-    roundRect(ctx, x - 100, 1220, 200, 120, 20)
-    ctx.fill()
-    ctx.font = 'bold 40px "Outfit", sans-serif'
-    ctx.fillStyle = scoreGrad
-    ctx.fillText(val, x, 1280)
-    ctx.font = '28px "Outfit", sans-serif'
-    ctx.fillStyle = 'rgba(245,238,255,0.45)'
-    ctx.fillText(labels.stats[i], x, 1320)
-  })
+  ctx.fillStyle = 'rgba(255,255,255,0.8)'
+  ctx.font = '38px "Outfit", sans-serif'
+  ctx.textAlign = 'center'
 
-  ctx.font = '40px "Outfit", sans-serif'
-  ctx.fillStyle = 'rgba(245,238,255,0.45)'
-  ctx.fillText(labels.cta, 540, 1820)
+  const ageDiff = userAge - data.skinAge
+  const ageText = ageDiff > 0
+    ? `Возраст кожи: ${data.skinAge} — на ${ageDiff} лет моложе! 🔥`
+    : `Возраст кожи: ${data.skinAge} лет`
+  ctx.fillText(ageText, 540, 1700)
+
+  const ctaGrad = ctx.createLinearGradient(0, 0, 500, 0)
+  ctaGrad.addColorStop(0, '#BF5AF2')
+  ctaGrad.addColorStop(1, '#FF375F')
+  ctx.fillStyle = ctaGrad
+  ctx.font = 'bold 40px "Outfit", sans-serif'
+  ctx.textAlign = 'center'
+  ctx.fillText('Проверь свою кожу → noora.uz', 540, 1860)
 
   return canvas.toDataURL('image/jpeg', 0.92)
-}
-
-function loadImage(src) {
-  return new Promise((resolve, reject) => {
-    const img = new Image()
-    img.onload = () => resolve(img)
-    img.onerror = reject
-    img.src = src
-  })
 }
 
 function roundRect(ctx, x, y, w, h, r) {

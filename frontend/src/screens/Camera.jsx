@@ -2,8 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { useI18n } from '../context/I18nContext'
-import { captureFromVideo } from '../utils/image'
+import { captureFromVideo, loadImageElement } from '../utils/image'
 import { analyzeFrame } from '../utils/frameValidator'
+import { loadFaceModels } from '../utils/faceRecognition'
+import { checkCache } from '../services/analysisCache'
 import ScreenHeader from '../components/ScreenHeader'
 
 async function getCameraStream(facingMode = 'user') {
@@ -48,7 +50,7 @@ async function playVideoElement(video) {
 
 export default function Camera() {
   const navigate = useNavigate()
-  const { takeCameraStream, setCapturedImage, showToast } = useApp()
+  const { takeCameraStream, setCapturedImage, setAnalysis, profile, showToast } = useApp()
   const { t } = useI18n()
 
   const videoRef = useRef(null)
@@ -62,7 +64,9 @@ export default function Camera() {
   const [showTips, setShowTips] = useState(false)
   const [validation, setValidation] = useState({ lightOk: false, faceOk: false })
 
-  const canSnap = ready && validation.lightOk && validation.faceOk && !capturing
+  const [checkingCache, setCheckingCache] = useState(false)
+
+  const canSnap = ready && validation.lightOk && validation.faceOk && !capturing && !checkingCache
 
   const attachStream = useCallback(async (stream) => {
     const video = videoRef.current
@@ -121,23 +125,49 @@ export default function Camera() {
     fileRef.current?.click()
   }
 
+  const processCapture = useCallback(async (image) => {
+    setCapturedImage(image)
+    stopCamera()
+    setCheckingCache(true)
+
+    try {
+      await loadFaceModels()
+      const imageElement = await loadImageElement(image)
+      const cached = await checkCache(imageElement)
+
+      if (cached) {
+        const enriched = {
+          ...cached,
+          realAge: profile.age ?? null,
+          ageDiff: profile.age != null ? profile.age - cached.skinAge : null
+        }
+        setAnalysis(enriched)
+        navigate('/result', { state: { result: enriched, fromCache: true } })
+        return
+      }
+    } catch (err) {
+      console.warn('Cache check failed:', err)
+    } finally {
+      setCheckingCache(false)
+    }
+
+    navigate('/analyzing', { state: { capturedImage: image } })
+  }, [navigate, profile.age, setAnalysis, setCapturedImage, stopCamera])
+
   const handleGallery = (e) => {
     const file = e.target.files?.[0]
     e.target.value = ''
     if (!file) return
 
     const reader = new FileReader()
-    reader.onload = () => {
-      const image = reader.result
-      setCapturedImage(image)
-      stopCamera()
-      navigate('/analyzing', { state: { capturedImage: image } })
-    }
+    reader.onload = () => processCapture(reader.result)
     reader.onerror = () => showToast(t('galleryError'))
     reader.readAsDataURL(file)
   }
 
   useEffect(() => {
+    loadFaceModels().catch(err => console.warn('Face models preload failed:', err))
+
     const pendingStream = takeCameraStream()
     if (pendingStream) {
       streamRef.current = pendingStream
@@ -170,9 +200,8 @@ export default function Camera() {
     setTimeout(() => setFlash(false), 400)
 
     const image = captureFromVideo(video)
-    setCapturedImage(image)
-    stopCamera()
-    navigate('/analyzing', { state: { capturedImage: image } })
+    setCapturing(false)
+    processCapture(image)
   }
 
   return (

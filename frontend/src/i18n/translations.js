@@ -44,6 +44,17 @@ export const translations = {
     tone: 'Тон кожи',
     pores: 'Поры',
     texture: 'Текстура',
+    redness: 'Покраснения',
+    darkCircles: 'Тёмные круги',
+    pigmentation: 'Пигментация',
+    dehydration: 'Обезвоженность',
+    oiliness: 'Жирность Т-зоны',
+    acne: 'Акне',
+    wrinkles: 'Морщины',
+    evenness: 'Ровность тона',
+    detailedAnalysis: 'Детальный анализ',
+    faceZones: 'Анализ по зонам',
+    fromCache: 'Результат из кэша (7 дней)',
     shareResult: '⬆ Поделиться результатом',
     share: '⬆ Поделиться',
     shareCard: 'Карточка',
@@ -131,6 +142,17 @@ export const translations = {
     tone: 'Teri tonusi',
     pores: 'Teshiklar',
     texture: 'Tekstura',
+    redness: 'Qizillik',
+    darkCircles: "Ko'z ostidagi qoraliklar",
+    pigmentation: 'Pigmentatsiya',
+    dehydration: 'Suvsizlanish',
+    oiliness: "Yog'lilik",
+    acne: 'Akne',
+    wrinkles: 'Ajinlar',
+    evenness: 'Rang tekisligi',
+    detailedAnalysis: 'Batafsil tahlil',
+    faceZones: 'Zonalarga tahlil',
+    fromCache: 'Kesh natijasi (7 kun)',
     shareResult: '⬆ Natijani ulashish',
     share: '⬆ Ulashish',
     shareCard: 'Karta',
@@ -185,6 +207,21 @@ const TEXTURE_MAP = {
   uz: { гладкая: 'Silliq', хорошая: 'Yaxshi', хорошо: 'Yaxshi', норм: 'O\'rt', неровная: 'Notekis' }
 }
 
+const DARK_CIRCLES_MAP = {
+  ru: { нет: 'Нет', слабые: 'Слабые', заметные: 'Заметные', выраженные: 'Выраженные' },
+  uz: { нет: 'Yo\'q', слабые: 'Zaif', заметные: 'Sezilarli', выраженные: 'Aniq' }
+}
+
+const ACNE_MAP = {
+  ru: { нет: 'Нет', единичные: 'Единичные', умеренное: 'Умеренное', выраженное: 'Выраженное' },
+  uz: { нет: 'Yo\'q', единичные: 'Yakka', умеренное: 'O\'rtacha', выраженное: 'Aniq' }
+}
+
+const WRINKLES_MAP = {
+  ru: { нет: 'Нет', первые: 'Первые', заметные: 'Заметные' },
+  uz: { нет: 'Yo\'q', первые: 'Birinchi', заметные: 'Sezilarli' }
+}
+
 export function getScoreLabel(score, lang) {
   const t = translations[lang]
   if (score >= 90) return t.scorePerfect
@@ -200,6 +237,18 @@ export function formatPores(val, lang = 'ru') {
 
 export function formatTexture(val, lang = 'ru') {
   return TEXTURE_MAP[lang]?.[val] || TEXTURE_MAP.ru[val] || val
+}
+
+export function formatDarkCircles(val, lang = 'ru') {
+  return DARK_CIRCLES_MAP[lang]?.[val] || DARK_CIRCLES_MAP.ru[val] || val
+}
+
+export function formatAcne(val, lang = 'ru') {
+  return ACNE_MAP[lang]?.[val] || ACNE_MAP.ru[val] || val
+}
+
+export function formatWrinkles(val, lang = 'ru') {
+  return WRINKLES_MAP[lang]?.[val] || WRINKLES_MAP.ru[val] || val
 }
 
 export function getShareLabels(lang) {

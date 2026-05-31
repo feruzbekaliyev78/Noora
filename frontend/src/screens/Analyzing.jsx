@@ -4,6 +4,8 @@ import { useApp } from '../context/AppContext'
 import { useI18n } from '../context/I18nContext'
 import { analyzeSkin } from '../services/api'
 import { saveAnalysis } from '../services/firebase'
+import { saveAnalysisCache } from '../services/analysisCache'
+import { loadImageElement } from '../utils/image'
 import ScreenHeader from '../components/ScreenHeader'
 
 const STEPS = ['step1', 'step2', 'step3', 'step4', 'step5']
@@ -45,14 +47,24 @@ export default function Analyzing() {
 
     const minDelay = new Promise(resolve => setTimeout(resolve, MIN_ANIMATION_MS))
     const analysisPromise = analyzeSkin(image)
-      .then(data => {
+      .then(async (data) => {
         const realAge = profile.age ?? null
         const enriched = {
           ...data,
           realAge,
-          ageDiff: realAge != null ? realAge - data.skinAge : null
+          ageDiff: realAge != null ? realAge - data.skinAge : null,
+          userName: profile.name,
+          userAge: profile.age
         }
-        saveAnalysis(userId, { ...enriched, image }).catch(() => {})
+
+        try {
+          const imageElement = await loadImageElement(image)
+          await saveAnalysisCache(userId, imageElement, enriched, profile)
+        } catch (err) {
+          console.warn('Cache save failed:', err)
+        }
+
+        saveAnalysis(userId, enriched).catch(() => {})
         return enriched
       })
       .catch(err => {
@@ -73,7 +85,7 @@ export default function Analyzing() {
     })
 
     return () => { cancelled = true }
-  }, [image, capturedImage, navigate, setCapturedImage, setAnalysis, addToHistory, userId, profile.age, showToast, t])
+  }, [image, capturedImage, navigate, setCapturedImage, setAnalysis, addToHistory, userId, profile, showToast, t])
 
   return (
     <div className="screen-page screen-analyzing">

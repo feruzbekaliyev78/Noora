@@ -9,7 +9,7 @@ const firebaseConfig = {
 
 let db = null
 
-function getDb() {
+export function getDb() {
   if (!import.meta.env.VITE_FIREBASE_API_KEY) return null
   if (!db) {
     const app = initializeApp(firebaseConfig)
@@ -22,8 +22,32 @@ export async function saveAnalysis(userId, analysisData) {
   const firestore = getDb()
   if (!firestore) return null
 
+  const {
+    image,
+    faceDescriptor,
+    expiresAt,
+    ...trackingFields
+  } = analysisData
+
   return addDoc(collection(firestore, 'users', userId, 'analyses'), {
-    ...analysisData,
+    skinScore: trackingFields.skinScore,
+    skinAge: trackingFields.skinAge,
+    hydration: trackingFields.hydration,
+    tone: trackingFields.tone,
+    pores: trackingFields.pores,
+    texture: trackingFields.texture,
+    redness: trackingFields.redness,
+    darkCircles: trackingFields.darkCircles,
+    pigmentation: trackingFields.pigmentation,
+    dehydration: trackingFields.dehydration,
+    oiliness: trackingFields.oiliness,
+    acne: trackingFields.acne,
+    wrinkles: trackingFields.wrinkles,
+    evenness: trackingFields.evenness,
+    zones: trackingFields.zones,
+    skinType: trackingFields.skinType,
+    userName: trackingFields.userName,
+    userAge: trackingFields.userAge,
     createdAt: new Date()
   })
 }

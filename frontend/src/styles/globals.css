@@ -222,6 +222,33 @@ html,body{
 .share-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.1),transparent)}
 .share-btn:active{transform:scale(0.97)}
 
+.cache-badge{font-size:2.8vw;color:var(--p3);margin-top:1vw;padding:1vw 2.5vw;border-radius:100px;
+  background:rgba(191,90,242,0.12);border:1px solid rgba(191,90,242,0.2);display:inline-block}
+
+.detailed-section{margin-bottom:4vw}
+.section-title{font-size:3.5vw;font-weight:700;margin-bottom:3vw;color:var(--text);letter-spacing:0.05em}
+.detailed-grid{display:grid;grid-template-columns:1fr 1fr;gap:2.5vw}
+.detailed-item{display:flex;align-items:center;gap:2.5vw;padding:3vw;background:rgba(255,255,255,0.03);
+  border:1px solid var(--border);border-radius:3.5vw}
+.detailed-item.good{border-color:rgba(52,199,89,0.3);background:rgba(52,199,89,0.06)}
+.detailed-icon{font-size:5vw;line-height:1}
+.detailed-label{font-size:2.5vw;color:var(--muted);margin-bottom:0.5vw}
+.detailed-value{font-size:3.5vw;font-weight:600}
+
+.face-zones{margin-bottom:4vw}
+.zone-title{font-size:3.5vw;font-weight:700;margin-bottom:3vw;color:var(--text)}
+.face-map{position:relative;height:55vw;background:rgba(255,255,255,0.03);border:1px solid var(--border);
+  border-radius:50% 50% 45% 45%;margin:0 auto;max-width:70vw;display:flex;align-items:center;justify-content:center}
+.face-map-outline{font-size:18vw;opacity:0.15;pointer-events:none}
+.zone-badge{position:absolute;padding:1.5vw 2.5vw;border-radius:100px;border:1.5px solid;
+  background:rgba(0,0,0,0.5);backdrop-filter:blur(8px);display:flex;flex-direction:column;align-items:center;gap:0.3vw}
+.zone-badge-label{font-size:2.2vw;opacity:0.8}
+.zone-badge-score{font-size:3.5vw;font-weight:700}
+.zone-top{top:8%;left:50%;transform:translateX(-50%)}
+.zone-center{top:42%;left:50%;transform:translateX(-50%)}
+.zone-sides{bottom:28%;left:50%;transform:translateX(-50%)}
+.zone-bottom{bottom:8%;left:50%;transform:translateX(-50%)}
+
 /* ─── SHARE CARD ─── */
 #s-share{padding:0}
 .sc-inner{flex:1;display:flex;flex-direction:column;
