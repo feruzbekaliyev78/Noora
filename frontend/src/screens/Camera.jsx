@@ -16,6 +16,14 @@ const EMPTY_VALIDATION = {
   allGood: false
 }
 
+function getChipStyle(isOk) {
+  return {
+    background: isOk ? 'rgba(52,199,89,0.2)' : 'rgba(255,55,95,0.15)',
+    border: `1px solid ${isOk ? '#34C759' : '#FF375F'}`,
+    color: isOk ? '#34C759' : '#FF375F'
+  }
+}
+
 async function getCameraStream(facingMode = 'user') {
   if (!navigator.mediaDevices?.getUserMedia) {
     throw new Error('Camera API unavailable')
@@ -196,10 +204,11 @@ export default function Camera() {
 
   useEffect(() => {
     const interval = setInterval(async () => {
-      if (videoRef.current && videoRef.current.readyState === 4) {
-        const result = await validateFrame(videoRef.current)
-        setValidation(result)
-      }
+      const video = videoRef.current
+      if (!video || video.videoWidth === 0) return
+
+      const result = await validateFrame(video)
+      setValidation(result)
     }, 500)
 
     return () => clearInterval(interval)
@@ -259,53 +268,37 @@ export default function Camera() {
           <div className="vfc bl" style={{ borderColor: cornerColor }} />
           <div className="vfc br" style={{ borderColor: cornerColor }} />
           <div className="chips">
-            <div
-              className="chip"
-              style={{
-                background: validation.lightOk ? 'rgba(52,199,89,0.2)' : 'rgba(255,55,95,0.2)',
-                border: `1px solid ${validation.lightOk ? '#34C759' : '#FF375F'}`,
-                color: validation.lightOk ? '#34C759' : '#FF375F'
-              }}
-            >
+            <div className="chip" style={getChipStyle(validation.lightOk)}>
               💡 {validation.lightOk ? t('lightGood') : t('lightBad')}
             </div>
-            <div
-              className="chip"
-              style={{
-                background: validation.noMakeup ? 'rgba(52,199,89,0.2)' : 'rgba(255,55,95,0.2)',
-                border: `1px solid ${validation.noMakeup ? '#34C759' : '#FF375F'}`,
-                color: validation.noMakeup ? '#34C759' : '#FF375F'
-              }}
-            >
+            <div className="chip" style={getChipStyle(validation.noMakeup)}>
               🚫 {validation.noMakeup ? t('makeupGood') : t('makeupBad')}
             </div>
-            <div
-              className="chip"
-              style={{
-                background: validation.faceOk ? 'rgba(52,199,89,0.2)' : 'rgba(255,55,95,0.2)',
-                border: `1px solid ${validation.faceOk ? '#34C759' : '#FF375F'}`,
-                color: validation.faceOk ? '#34C759' : '#FF375F'
-              }}
-            >
+            <div className="chip" style={getChipStyle(validation.faceOk)}>
               👁 {validation.faceOk ? t('camFaceOk') : t('faceNotFound')}
             </div>
-            <div
-              className="chip"
-              style={{
-                background: validation.foreheadOk ? 'rgba(52,199,89,0.2)' : 'rgba(255,55,95,0.2)',
-                border: `1px solid ${validation.foreheadOk ? '#34C759' : '#FF375F'}`,
-                color: validation.foreheadOk ? '#34C759' : '#FF375F'
-              }}
-            >
+            <div className="chip" style={getChipStyle(validation.foreheadOk)}>
               ✂️ {validation.foreheadOk ? t('foreheadGood') : t('foreheadBad')}
             </div>
           </div>
         </div>
         <div className="tips">
-          <div className="tip"><div className="tip-ico">💡</div>{t('tipLight')}</div>
-          <div className="tip"><div className="tip-ico">🚫</div>{t('tipNoMakeup')}</div>
-          <div className="tip"><div className="tip-ico">👁</div>{t('tipLook')}</div>
-          <div className="tip"><div className="tip-ico">✂️</div>{t('tipHair')}</div>
+          <div className="tip" style={getChipStyle(validation.lightOk)}>
+            <div className="tip-ico">💡</div>
+            {validation.lightOk ? t('lightGood') : t('lightBad')}
+          </div>
+          <div className="tip" style={getChipStyle(validation.noMakeup)}>
+            <div className="tip-ico">🚫</div>
+            {validation.noMakeup ? t('makeupGood') : t('makeupBad')}
+          </div>
+          <div className="tip" style={getChipStyle(validation.faceOk)}>
+            <div className="tip-ico">👁</div>
+            {validation.faceOk ? t('camFaceOk') : t('faceNotFound')}
+          </div>
+          <div className="tip" style={getChipStyle(validation.foreheadOk)}>
+            <div className="tip-ico">✂️</div>
+            {validation.foreheadOk ? t('foreheadGood') : t('foreheadBad')}
+          </div>
         </div>
         <div className="shutter-row">
           <div className="shutter-side" onClick={openGallery}>🖼</div>

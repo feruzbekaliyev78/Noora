@@ -129,9 +129,9 @@ html,body{
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
 
 .tips{display:flex;gap:2vw;margin-bottom:4vw}
-.tip{flex:1;padding:3vw 2vw;border-radius:4vw;background:rgba(255,255,255,0.03);
-  border:1px solid var(--border);text-align:center;font-size:2.8vw;color:var(--muted);
-  display:flex;flex-direction:column;align-items:center;gap:1vw}
+.tip{flex:1;padding:3vw 2vw;border-radius:4vw;text-align:center;font-size:2.8vw;
+  font-weight:600;display:flex;flex-direction:column;align-items:center;gap:1vw;
+  transition:background 0.2s,border-color 0.2s,color 0.2s}
 .tip-ico{font-size:5vw}
 
 .shutter-row{display:flex;align-items:center;justify-content:center;gap:8vw}
