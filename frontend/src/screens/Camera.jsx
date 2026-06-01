@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { useI18n } from '../context/I18nContext'
 import { captureFromVideo, loadImageElement } from '../utils/image'
-import { validateFrame } from '../utils/cameraValidator'
+import { initFaceDetector, validateFrame } from '../utils/cameraValidator'
 import { loadFaceModels } from '../utils/faceRecognition'
 import { checkCache } from '../services/analysisCache'
 import ScreenHeader from '../components/ScreenHeader'
@@ -72,6 +72,8 @@ export default function Camera() {
   const [showTips, setShowTips] = useState(false)
   const [validation, setValidation] = useState(EMPTY_VALIDATION)
   const [checkingCache, setCheckingCache] = useState(false)
+
+  const validatingRef = useRef(false)
 
   const canSnap = ready && validation.allGood && !capturing && !checkingCache
 
@@ -180,6 +182,7 @@ export default function Camera() {
   }
 
   useEffect(() => {
+    initFaceDetector().catch(err => console.warn('Face detector preload failed:', err))
     loadFaceModels().catch(err => console.warn('Face models preload failed:', err))
 
     const pendingStream = takeCameraStream()
@@ -196,13 +199,28 @@ export default function Camera() {
   useEffect(() => {
     if (!ready) return undefined
 
-    const interval = setInterval(() => {
-      const video = videoRef.current
-      if (!video?.videoWidth) return
-      setValidation(validateFrame(video))
-    }, 500)
+    let cancelled = false
 
-    return () => clearInterval(interval)
+    const runValidation = async () => {
+      const video = videoRef.current
+      if (!video?.videoWidth || cancelled || validatingRef.current) return
+
+      validatingRef.current = true
+      try {
+        const result = await validateFrame(video)
+        if (!cancelled) setValidation(result)
+      } finally {
+        validatingRef.current = false
+      }
+    }
+
+    runValidation()
+    const interval = setInterval(runValidation, 500)
+
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+    }
   }, [ready])
 
   const snap = () => {

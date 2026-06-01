@@ -1,3 +1,5 @@
+import * as faceapi from 'face-api.js'
+
 const EMPTY_RESULT = {
   lightOk: false,
   faceOk: false,
@@ -6,7 +8,46 @@ const EMPTY_RESULT = {
   allGood: false
 }
 
-export const validateFrame = (video) => {
+let detectorReady = false
+let detectorFailed = false
+let loadPromise = null
+
+export const initFaceDetector = async () => {
+  if (detectorReady) return true
+  if (detectorFailed) return false
+  if (loadPromise) return loadPromise
+
+  loadPromise = (async () => {
+    try {
+      await faceapi.nets.tinyFaceDetector.loadFromUri('/models')
+      detectorReady = true
+      return true
+    } catch (err) {
+      detectorFailed = true
+      console.warn('Tiny face detector failed to load:', err)
+      return false
+    }
+  })()
+
+  return loadPromise
+}
+
+async function detectFace(canvas) {
+  if (!detectorReady) return false
+
+  try {
+    const detection = await faceapi.detectSingleFace(
+      canvas,
+      new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.5 })
+    )
+    return !!detection
+  } catch (err) {
+    console.warn('Face detection failed:', err)
+    return false
+  }
+}
+
+export const validateFrame = async (video) => {
   if (!video?.videoWidth || !video?.videoHeight) {
     return { ...EMPTY_RESULT }
   }
@@ -17,22 +58,14 @@ export const validateFrame = (video) => {
     canvas.height = 100
     const ctx = canvas.getContext('2d')
     ctx.drawImage(video, 0, 0, 100, 100)
-    const pixels = ctx.getImageData(0, 0, 100, 100).data
 
+    const pixels = ctx.getImageData(0, 0, 100, 100).data
     let brightness = 0
     for (let i = 0; i < pixels.length; i += 4) {
       brightness += (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3
     }
     brightness = brightness / (pixels.length / 4)
     const lightOk = brightness > 85 && brightness < 220
-
-    const centerPixels = ctx.getImageData(30, 20, 40, 60).data
-    let centerBrightness = 0
-    for (let i = 0; i < centerPixels.length; i += 4) {
-      centerBrightness += (centerPixels[i] + centerPixels[i + 1] + centerPixels[i + 2]) / 3
-    }
-    centerBrightness = centerBrightness / (centerPixels.length / 4)
-    const faceOk = centerBrightness > 60 && centerBrightness < 200
 
     const lipPixels = ctx.getImageData(35, 65, 30, 15).data
     let redCount = 0
@@ -51,6 +84,8 @@ export const validateFrame = (video) => {
     }
     foreheadBrightness = foreheadBrightness / (foreheadPixels.length / 4)
     const foreheadOk = foreheadBrightness > 50
+
+    const faceOk = await detectFace(canvas)
 
     return {
       lightOk,
