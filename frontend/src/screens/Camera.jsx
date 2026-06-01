@@ -3,10 +3,20 @@ import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { useI18n } from '../context/I18nContext'
 import { captureFromVideo, loadImageElement } from '../utils/image'
-import { analyzeFrame } from '../utils/frameValidator'
+import { initValidator, validateFrame } from '../utils/cameraValidator'
 import { loadFaceModels } from '../utils/faceRecognition'
 import { checkCache } from '../services/analysisCache'
 import ScreenHeader from '../components/ScreenHeader'
+
+const EMPTY_VALIDATION = {
+  light: false,
+  lightBright: false,
+  faceFound: false,
+  lookingAt: false,
+  forehead: false,
+  noMakeup: false,
+  allGood: false
+}
 
 async function getCameraStream(facingMode = 'user') {
   if (!navigator.mediaDevices?.getUserMedia) {
@@ -62,11 +72,11 @@ export default function Camera() {
   const [flash, setFlash] = useState(false)
   const [capturing, setCapturing] = useState(false)
   const [showTips, setShowTips] = useState(false)
-  const [validation, setValidation] = useState({ lightOk: false, faceOk: false })
-
+  const [validation, setValidation] = useState(EMPTY_VALIDATION)
   const [checkingCache, setCheckingCache] = useState(false)
 
-  const canSnap = ready && validation.lightOk && validation.faceOk && !capturing && !checkingCache
+  const canSnap = ready && validation.allGood && !capturing && !checkingCache
+  const faceReady = validation.faceFound && validation.lookingAt
 
   const attachStream = useCallback(async (stream) => {
     const video = videoRef.current
@@ -94,7 +104,7 @@ export default function Camera() {
     if (video) video.srcObject = null
 
     setReady(false)
-    setValidation({ lightOk: false, faceOk: false })
+    setValidation(EMPTY_VALIDATION)
   }, [])
 
   const startCamera = useCallback(async (facingMode = facingRef.current) => {
@@ -173,6 +183,7 @@ export default function Camera() {
   }
 
   useEffect(() => {
+    initValidator().catch(err => console.warn('Validator preload failed:', err))
     loadFaceModels().catch(err => console.warn('Face models preload failed:', err))
 
     const pendingStream = takeCameraStream()
@@ -192,7 +203,7 @@ export default function Camera() {
     const interval = setInterval(() => {
       const video = videoRef.current
       if (!video?.videoWidth) return
-      setValidation(analyzeFrame(video))
+      setValidation(validateFrame(video))
     }, 500)
 
     return () => clearInterval(interval)
@@ -209,6 +220,12 @@ export default function Camera() {
     const image = captureFromVideo(video)
     setCapturing(false)
     processCapture(image)
+  }
+
+  const getLookLabel = () => {
+    if (faceReady) return t('lookGood')
+    if (!validation.faceFound) return t('faceNotFound')
+    return t('lookBad')
   }
 
   return (
@@ -234,16 +251,22 @@ export default function Camera() {
               </div>
             </div>
           )}
-          <div className={`vfc tl ${validation.faceOk ? 'ready' : ''}`} />
-          <div className={`vfc tr ${validation.faceOk ? 'ready' : ''}`} />
-          <div className={`vfc bl ${validation.faceOk ? 'ready' : ''}`} />
-          <div className={`vfc br ${validation.faceOk ? 'ready' : ''}`} />
+          <div className={`vfc tl ${validation.allGood ? 'ready' : ''}`} />
+          <div className={`vfc tr ${validation.allGood ? 'ready' : ''}`} />
+          <div className={`vfc bl ${validation.allGood ? 'ready' : ''}`} />
+          <div className={`vfc br ${validation.allGood ? 'ready' : ''}`} />
           <div className="chips">
-            <div className={`chip ${validation.lightOk ? 'ok' : 'bad'}`}>
-              <div className="chip-dot" />💡 {validation.lightOk ? t('lightGood') : t('lightBad')}
+            <div className={`chip ${validation.light ? 'ok' : 'bad'}`}>
+              <div className="chip-dot" />💡 {validation.light ? t('lightGood') : (validation.lightBright ? t('lightBright') : t('lightBad'))}
             </div>
-            <div className={`chip ${validation.faceOk ? 'ok' : 'bad'}`}>
-              <div className="chip-dot" />👁 {validation.faceOk ? t('faceGood') : t('faceBad')}
+            <div className={`chip ${faceReady ? 'ok' : 'bad'}`}>
+              <div className="chip-dot" />👁 {getLookLabel()}
+            </div>
+            <div className={`chip ${validation.forehead ? 'ok' : 'bad'}`}>
+              <div className="chip-dot" />✂️ {validation.forehead ? t('foreheadGood') : t('foreheadBad')}
+            </div>
+            <div className={`chip ${validation.noMakeup ? 'ok' : 'bad'}`}>
+              <div className="chip-dot" />🚫 {validation.noMakeup ? t('makeupGood') : t('makeupBad')}
             </div>
           </div>
         </div>
@@ -255,7 +278,13 @@ export default function Camera() {
         </div>
         <div className="shutter-row">
           <div className="shutter-side" onClick={openGallery}>🖼</div>
-          <div className={`shutter ${canSnap ? '' : 'disabled'}`} onClick={snap}>📸</div>
+          <div
+            className={`shutter ${canSnap ? '' : 'disabled'}`}
+            style={{ opacity: canSnap ? 1 : 0.4 }}
+            onClick={snap}
+          >
+            📸
+          </div>
           <div className="shutter-side" onClick={flipCamera}>🔄</div>
         </div>
       </div>

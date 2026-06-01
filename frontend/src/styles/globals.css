@@ -122,8 +122,8 @@ html,body{
   background:linear-gradient(90deg,transparent 5%,var(--p1) 50%,transparent 95%);
   box-shadow:0 0 10px var(--p1);animation:beamA 2.5s ease-in-out infinite}
 @keyframes beamA{0%,100%{top:25%;opacity:0}10%,90%{opacity:1}50%{top:75%}}
-.chips{position:absolute;bottom:4vw;left:0;right:0;display:flex;justify-content:center;gap:2vw}
-.chip{padding:1.5vw 4vw;border-radius:100px;font-size:3vw;font-weight:600;
+.chips{position:absolute;bottom:4vw;left:0;right:0;display:flex;flex-wrap:wrap;justify-content:center;gap:1.5vw;padding:0 2vw}
+.chip{padding:1.2vw 3vw;border-radius:100px;font-size:2.6vw;font-weight:600;
   display:flex;align-items:center;gap:1.5vw;backdrop-filter:blur(10px)}
 .chip.ok{background:rgba(52,199,89,0.2);color:#34C759;border:1px solid rgba(52,199,89,0.3)}
 .chip.bad{background:rgba(255,55,95,0.2);color:#FF375F;border:1px solid rgba(255,55,95,0.35)}
