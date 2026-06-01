@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { analyzeSkin } = require('../services/gemini')
+const { analyzeSkin, detectFace } = require('../services/gemini')
 
 function calculateSkinScore(data) {
   const poresMap = { отл: 100, хор: 80, норм: 60, увелич: 30 }
@@ -28,6 +28,14 @@ router.post('/analyze', async (req, res) => {
     const { image } = req.body
     if (!image) {
       return res.status(400).json({ error: 'Image is required' })
+    }
+
+    const hasFace = await detectFace(image)
+    if (!hasFace) {
+      return res.status(400).json({
+        error: 'NO_FACE',
+        message: 'Лицо не найдено. Сделайте селфи!'
+      })
     }
 
     const result = await analyzeSkin(image)

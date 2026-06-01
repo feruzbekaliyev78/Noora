@@ -101,7 +101,8 @@ export const translations = {
     shareTitle: 'Мой результат NOORA',
     shareText: 'Мой Skin Score: {n} 🔥 Проверь свою кожу!',
     cameraError: 'Не удалось открыть камеру',
-    analyzeError: 'Ошибка анализа. Попробуй снова.'
+    analyzeError: 'Ошибка анализа. Попробуй снова.',
+    noFaceError: 'Лицо не найдено. Сделайте селфи!'
   },
   uz: {
     splashSub: 'AI teri tahlili',
@@ -205,7 +206,8 @@ export const translations = {
     shareTitle: 'NOORA natijam',
     shareText: 'Skin Score: {n} 🔥 O\'z teringni tekshir!',
     cameraError: 'Kamerani ochib bo\'lmadi',
-    analyzeError: 'Tahlil xatosi. Qayta urinib ko\'ring.'
+    analyzeError: 'Tahlil xatosi. Qayta urinib ko\'ring.',
+    noFaceError: 'Yuz topilmadi. Selfi qiling!'
   }
 }
 

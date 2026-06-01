@@ -69,11 +69,19 @@ export default function Analyzing() {
       })
       .catch(err => {
         console.error(err)
+        if (err.code === 'NO_FACE') {
+          return { noFace: true, message: err.message }
+        }
         return null
       })
 
     Promise.all([minDelay, analysisPromise]).then(([, data]) => {
       if (cancelled) return
+      if (data?.noFace) {
+        showToast(data.message || t('noFaceError'))
+        navigate('/camera')
+        return
+      }
       if (data) {
         setAnalysis(data)
         addToHistory(data)

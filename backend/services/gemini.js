@@ -52,6 +52,8 @@ const PROMPT = `
 - Минимум 20
 `
 
+const FACE_CHECK_PROMPT = 'Is there a human face in this photo? Answer only YES or NO'
+
 const GENERATION_CONFIG = {
   temperature: 0.1,
   topP: 0.8,
@@ -79,6 +81,62 @@ function parseModelJson(text) {
     if (match) return JSON.parse(match[0])
     throw new Error('Invalid JSON from Gemini')
   }
+}
+
+function parseYesNo(text) {
+  const clean = text.trim().toUpperCase()
+  if (clean.includes('YES')) return true
+  if (clean.includes('NO')) return false
+  return false
+}
+
+async function checkFaceWithModel(modelName, imageData, retries = 2) {
+  const model = genAI.getGenerativeModel({
+    model: modelName,
+    generationConfig: { ...GENERATION_CONFIG, temperature: 0 }
+  })
+
+  let lastError
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const result = await model.generateContent([FACE_CHECK_PROMPT, imageData])
+      const text = result.response.text()
+      return parseYesNo(text)
+    } catch (err) {
+      lastError = err
+      const retryable = /503|429|high demand|unavailable/i.test(err.message || '')
+      if (attempt < retries && retryable) {
+        await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)))
+        continue
+      }
+      throw err
+    }
+  }
+
+  throw lastError
+}
+
+async function detectFace(imageBase64) {
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error('GEMINI_API_KEY is not configured')
+  }
+
+  const { mimeType, data } = parseImagePayload(imageBase64)
+  const imageData = {
+    inlineData: { data, mimeType }
+  }
+
+  let lastError
+  for (const modelName of MODELS) {
+    try {
+      return await checkFaceWithModel(modelName, imageData)
+    } catch (err) {
+      lastError = err
+      console.warn(`Face check model ${modelName} failed:`, err.message)
+    }
+  }
+
+  throw lastError || new Error('Face detection failed')
 }
 
 async function generateWithModel(modelName, imageData, retries = 2) {
@@ -130,4 +188,4 @@ async function analyzeSkin(imageBase64) {
   throw lastError || new Error('All Gemini models failed')
 }
 
-module.exports = { analyzeSkin }
+module.exports = { analyzeSkin, detectFace }

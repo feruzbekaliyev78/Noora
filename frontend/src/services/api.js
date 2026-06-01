@@ -28,7 +28,9 @@ export async function analyzeSkin(image) {
     : null
 
   if (!res.ok) {
-    throw new Error(data?.message || data?.error || 'Analysis failed')
+    const error = new Error(data?.message || data?.error || 'Analysis failed')
+    error.code = data?.error
+    throw error
   }
 
   if (!data) {
