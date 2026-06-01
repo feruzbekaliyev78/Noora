@@ -5,7 +5,14 @@ const PHOTO_HEIGHT = Math.round(1920 * 0.65)
 function loadImage(src) {
   return new Promise((resolve, reject) => {
     const img = new Image()
-    img.onload = () => resolve(img)
+    img.onload = async () => {
+      try {
+        if (img.decode) await img.decode()
+      } catch {
+        // decode optional
+      }
+      resolve(img)
+    }
     img.onerror = reject
     img.src = src
   })
@@ -51,6 +58,15 @@ async function ensureFonts() {
   ])
 }
 
+function drawBottomPanel(ctx) {
+  const bgGrad = ctx.createLinearGradient(0, PHOTO_HEIGHT, 0, 1920)
+  bgGrad.addColorStop(0, '#120820')
+  bgGrad.addColorStop(0.5, '#0a0518')
+  bgGrad.addColorStop(1, '#06030f')
+  ctx.fillStyle = bgGrad
+  ctx.fillRect(0, PHOTO_HEIGHT, 1080, 1920 - PHOTO_HEIGHT)
+}
+
 export async function generateShareCard(data, profile, userPhoto) {
   await ensureFonts()
 
@@ -59,26 +75,28 @@ export async function generateShareCard(data, profile, userPhoto) {
   canvas.height = 1920
   const ctx = canvas.getContext('2d')
 
-  const bgGrad = ctx.createLinearGradient(0, PHOTO_HEIGHT, 0, 1920)
-  bgGrad.addColorStop(0, '#120820')
-  bgGrad.addColorStop(0.5, '#0a0518')
-  bgGrad.addColorStop(1, '#06030f')
-  ctx.fillStyle = bgGrad
-  ctx.fillRect(0, PHOTO_HEIGHT, 1080, 1920 - PHOTO_HEIGHT)
+  ctx.fillStyle = '#06030f'
+  ctx.fillRect(0, 0, 1080, 1920)
 
   if (userPhoto) {
     const img = await loadImage(userPhoto)
     drawCoverPhoto(ctx, img, 1080, PHOTO_HEIGHT)
 
-    const fadeGrad = ctx.createLinearGradient(0, PHOTO_HEIGHT - 400, 0, PHOTO_HEIGHT)
+    const fadeGrad = ctx.createLinearGradient(0, PHOTO_HEIGHT - 480, 0, PHOTO_HEIGHT + 80)
     fadeGrad.addColorStop(0, 'rgba(6,3,15,0)')
+    fadeGrad.addColorStop(0.55, 'rgba(6,3,15,0.85)')
     fadeGrad.addColorStop(1, 'rgba(6,3,15,1)')
     ctx.fillStyle = fadeGrad
-    ctx.fillRect(0, PHOTO_HEIGHT - 400, 1080, 400)
+    ctx.fillRect(0, PHOTO_HEIGHT - 480, 1080, 560)
   } else {
-    ctx.fillStyle = '#1a0d2e'
+    const placeholderGrad = ctx.createLinearGradient(0, 0, 0, PHOTO_HEIGHT)
+    placeholderGrad.addColorStop(0, '#1a0d2e')
+    placeholderGrad.addColorStop(1, '#120820')
+    ctx.fillStyle = placeholderGrad
     ctx.fillRect(0, 0, 1080, PHOTO_HEIGHT)
   }
+
+  drawBottomPanel(ctx)
 
   const logoGrad = ctx.createLinearGradient(60, 60, 160, 140)
   logoGrad.addColorStop(0, '#BF5AF2')
@@ -106,34 +124,35 @@ export async function generateShareCard(data, profile, userPhoto) {
   ctx.fillStyle = 'white'
   ctx.font = 'bold 52px "Outfit", sans-serif'
   ctx.textAlign = 'left'
-  ctx.fillText(userName, 60, 1320)
+  ctx.fillText(userName, 60, 1310)
 
-  const scoreGrad = ctx.createLinearGradient(60, 1350, 500, 1550)
+  const scoreGrad = ctx.createLinearGradient(60, 1340, 520, 1580)
   scoreGrad.addColorStop(0, '#9B59FF')
   scoreGrad.addColorStop(0.5, '#BF5AF2')
   scoreGrad.addColorStop(1, '#FF375F')
   ctx.fillStyle = scoreGrad
   ctx.font = 'bold 240px "Bebas Neue", sans-serif'
   ctx.textAlign = 'left'
-  ctx.fillText(String(data.skinScore), 60, 1570)
+  ctx.fillText(String(data.skinScore ?? '—'), 60, 1560)
 
   ctx.fillStyle = 'rgba(255,255,255,0.4)'
   ctx.font = '36px "Outfit", sans-serif'
-  ctx.fillText('SKIN SCORE', 60, 1620)
+  ctx.fillText('SKIN SCORE', 60, 1610)
 
   ctx.fillStyle = 'rgba(255,255,255,0.08)'
-  roundRect(ctx, 60, 1650, 960, 80, 40)
+  roundRect(ctx, 60, 1640, 960, 80, 40)
   ctx.fill()
 
-  ctx.fillStyle = 'rgba(255,255,255,0.8)'
+  ctx.fillStyle = 'rgba(255,255,255,0.85)'
   ctx.font = '38px "Outfit", sans-serif'
   ctx.textAlign = 'center'
 
-  const ageDiff = userAge - data.skinAge
+  const skinAge = data.skinAge ?? '—'
+  const ageDiff = userAge - skinAge
   const ageText = ageDiff > 0
-    ? `Возраст кожи: ${data.skinAge} — на ${ageDiff} лет моложе! 🔥`
-    : `Возраст кожи: ${data.skinAge} лет`
-  ctx.fillText(ageText, 540, 1700)
+    ? `Возраст кожи: ${skinAge} — на ${ageDiff} лет моложе! 🔥`
+    : `Возраст кожи: ${skinAge} лет`
+  ctx.fillText(ageText, 540, 1690)
 
   const ctaGrad = ctx.createLinearGradient(290, 0, 790, 0)
   ctaGrad.addColorStop(0, '#BF5AF2')
@@ -141,7 +160,7 @@ export async function generateShareCard(data, profile, userPhoto) {
   ctx.fillStyle = ctaGrad
   ctx.font = 'bold 40px "Outfit", sans-serif'
   ctx.textAlign = 'center'
-  ctx.fillText('Проверь свою кожу → noora.uz', 540, 1860)
+  ctx.fillText('Проверь свою кожу → noora.uz', 540, 1850)
 
   return canvas.toDataURL('image/jpeg', 0.92)
 }

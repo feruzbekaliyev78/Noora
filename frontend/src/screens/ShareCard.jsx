@@ -13,6 +13,8 @@ export default function ShareCard() {
   const [cardUrl, setCardUrl] = useState(null)
   const [generating, setGenerating] = useState(true)
 
+  const photo = capturedImage || analysis?.image
+
   useEffect(() => {
     if (!analysis) {
       navigate('/result')
@@ -22,7 +24,7 @@ export default function ShareCard() {
     let cancelled = false
     setGenerating(true)
 
-    generateShareCard(analysis, profile, capturedImage)
+    generateShareCard(analysis, profile, photo)
       .then((url) => {
         if (!cancelled) setCardUrl(url)
       })
@@ -35,14 +37,14 @@ export default function ShareCard() {
       })
 
     return () => { cancelled = true }
-  }, [analysis, capturedImage, profile, navigate, showToast, t])
+  }, [analysis, photo, profile, navigate, showToast, t])
 
   if (!analysis) return null
 
   const handleShare = async (e) => {
     createRipple(e.currentTarget, e)
     try {
-      const url = cardUrl || await generateShareCard(analysis, profile, capturedImage)
+      const url = cardUrl || await generateShareCard(analysis, profile, photo)
       if (!cardUrl) setCardUrl(url)
       await shareCardImage(url, analysis.skinScore, lang)
       showToast(t('cardReady'))
@@ -56,7 +58,7 @@ export default function ShareCard() {
 
   const handleDownload = async () => {
     try {
-      const url = cardUrl || await generateShareCard(analysis, profile, capturedImage)
+      const url = cardUrl || await generateShareCard(analysis, profile, photo)
       if (!cardUrl) setCardUrl(url)
       const a = document.createElement('a')
       a.href = url
@@ -78,7 +80,9 @@ export default function ShareCard() {
           <div className="share-preview-loading">{t('shareCard')}...</div>
         )}
         {cardUrl && (
-          <img src={cardUrl} alt="" className="share-preview-img" />
+          <div className="share-preview-frame">
+            <img src={cardUrl} alt="" className="share-preview-img" />
+          </div>
         )}
       </div>
       <div className="sc-actions">

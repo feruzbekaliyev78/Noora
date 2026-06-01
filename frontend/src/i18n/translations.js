@@ -61,6 +61,11 @@ export const translations = {
     evenness: 'Ровность тона',
     detailedAnalysis: 'Детальный анализ',
     faceZones: 'Анализ по зонам',
+    zoneForehead: 'Лоб',
+    zoneCheek: 'Щёка',
+    zoneNose: 'Нос',
+    zoneChin: 'Подбородок',
+    unknown: 'Неизвестно',
     fromCache: 'Результат из кэша (7 дней)',
     shareResult: '⬆ Поделиться результатом',
     share: '⬆ Поделиться',
@@ -167,6 +172,11 @@ export const translations = {
     evenness: 'Rang tekisligi',
     detailedAnalysis: 'Batafsil tahlil',
     faceZones: 'Zonalarga tahlil',
+    zoneForehead: 'Peshona',
+    zoneCheek: 'Yonoq',
+    zoneNose: 'Burun',
+    zoneChin: 'Iyak',
+    unknown: 'Noma\'lum',
     fromCache: 'Kesh natijasi (7 kun)',
     shareResult: '⬆ Natijani ulashish',
     share: '⬆ Ulashish',
@@ -224,18 +234,18 @@ const TEXTURE_MAP = {
 }
 
 const DARK_CIRCLES_MAP = {
-  ru: { нет: 'Нет', слабые: 'Слабые', заметные: 'Заметные', выраженные: 'Выраженные' },
-  uz: { нет: 'Yo\'q', слабые: 'Zaif', заметные: 'Sezilarli', выраженные: 'Aniq' }
+  ru: { нет: 'Нет ✅', слабые: 'Едва заметны', заметные: 'Заметные', выраженные: 'Выраженные' },
+  uz: { нет: 'Yo\'q ✅', слабые: 'Deyarli sezilmaydi', заметные: 'O\'rtacha', выраженные: 'Aniq ko\'rinadi' }
 }
 
 const ACNE_MAP = {
-  ru: { нет: 'Нет', единичные: 'Единичные', умеренное: 'Умеренное', выраженное: 'Выраженное' },
-  uz: { нет: 'Yo\'q', единичные: 'Yakka', умеренное: 'O\'rtacha', выраженное: 'Aniq' }
+  ru: { нет: 'Нет ✅', единичные: 'Единичные', умеренное: 'Умеренное', выраженное: 'Выраженное' },
+  uz: { нет: 'Yo\'q ✅', единичные: 'Yakka belgilar', умеренное: 'O\'rtacha', выраженное: 'Ko\'p' }
 }
 
 const WRINKLES_MAP = {
-  ru: { нет: 'Нет', первые: 'Первые', заметные: 'Заметные' },
-  uz: { нет: 'Yo\'q', первые: 'Birinchi', заметные: 'Sezilarli' }
+  ru: { нет: 'Нет ✅', первые: 'Первые признаки', заметные: 'Заметные' },
+  uz: { нет: 'Yo\'q ✅', первые: 'Birinchi belgilar bor', заметные: 'Aniq ko\'rinadi' }
 }
 
 export function getScoreLabel(score, lang) {
@@ -256,15 +266,18 @@ export function formatTexture(val, lang = 'ru') {
 }
 
 export function formatDarkCircles(val, lang = 'ru') {
-  return DARK_CIRCLES_MAP[lang]?.[val] || DARK_CIRCLES_MAP.ru[val] || val
+  if (!val) return translations[lang]?.unknown || translations.ru.unknown
+  return DARK_CIRCLES_MAP[lang]?.[val] || DARK_CIRCLES_MAP.ru[val] || translations[lang]?.unknown || translations.ru.unknown
 }
 
 export function formatAcne(val, lang = 'ru') {
-  return ACNE_MAP[lang]?.[val] || ACNE_MAP.ru[val] || val
+  if (!val) return translations[lang]?.unknown || translations.ru.unknown
+  return ACNE_MAP[lang]?.[val] || ACNE_MAP.ru[val] || translations[lang]?.unknown || translations.ru.unknown
 }
 
 export function formatWrinkles(val, lang = 'ru') {
-  return WRINKLES_MAP[lang]?.[val] || WRINKLES_MAP.ru[val] || val
+  if (!val) return translations[lang]?.unknown || translations.ru.unknown
+  return WRINKLES_MAP[lang]?.[val] || WRINKLES_MAP.ru[val] || translations[lang]?.unknown || translations.ru.unknown
 }
 
 export function getShareLabels(lang) {

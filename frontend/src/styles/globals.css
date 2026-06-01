@@ -234,22 +234,26 @@ html,body{
 
 .face-zones{margin-bottom:4vw}
 .zone-title{font-size:3.5vw;font-weight:700;margin-bottom:3vw;color:var(--text)}
-.face-map{position:relative;height:55vw;background:rgba(255,255,255,0.03);border:1px solid var(--border);
-  border-radius:50% 50% 45% 45%;margin:0 auto;max-width:70vw;display:flex;align-items:center;justify-content:center}
-.face-map-outline{font-size:18vw;opacity:0.15;pointer-events:none}
-.zone-badge{position:absolute;padding:1.5vw 2.5vw;border-radius:100px;border:1.5px solid;
-  background:rgba(0,0,0,0.5);backdrop-filter:blur(8px);display:flex;flex-direction:column;align-items:center;gap:0.3vw}
-.zone-badge-label{font-size:2.2vw;opacity:0.8}
-.zone-badge-score{font-size:3.5vw;font-weight:700}
-.zone-top{top:8%;left:50%;transform:translateX(-50%)}
-.zone-center{top:42%;left:50%;transform:translateX(-50%)}
-.zone-sides{bottom:28%;left:50%;transform:translateX(-50%)}
-.zone-bottom{bottom:8%;left:50%;transform:translateX(-50%)}
+.face-map{position:relative;height:62vw;max-width:72vw;margin:0 auto;
+  background:rgba(255,255,255,0.03);border:1px solid var(--border);
+  border-radius:50% 50% 45% 45%;display:flex;align-items:center;justify-content:center}
+.face-map-outline{font-size:16vw;opacity:0.12;pointer-events:none}
+.zone-badge{position:absolute;padding:1.2vw 2vw;border-radius:100px;border:1.5px solid;
+  background:rgba(0,0,0,0.55);backdrop-filter:blur(8px);display:flex;flex-direction:column;
+  align-items:center;gap:0.2vw;min-width:14vw;z-index:1}
+.zone-badge-label{font-size:2vw;opacity:0.85;white-space:nowrap}
+.zone-badge-score{font-size:3.2vw;font-weight:700;line-height:1}
+.zone-top{top:4%;left:50%;transform:translateX(-50%)}
+.zone-left{top:32%;left:1%;transform:none}
+.zone-right{top:32%;right:1%;transform:none}
+.zone-nose{top:48%;left:50%;transform:translateX(-50%)}
+.zone-bottom{bottom:6%;left:50%;transform:translateX(-50%)}
 
 /* ─── SHARE CARD ─── */
 .share-preview-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:3vw 4vw;min-height:0;overflow:hidden}
 .share-preview-loading{font-size:4vw;color:var(--muted)}
-.share-preview-img{width:100%;max-height:72vh;object-fit:contain;border-radius:4vw;
+.share-preview-frame{width:100%;max-width:92vw;aspect-ratio:9/16;max-height:72vh;display:flex;align-items:center;justify-content:center}
+.share-preview-img{width:100%;height:100%;object-fit:contain;border-radius:4vw;
   box-shadow:0 4vw 12vw rgba(0,0,0,0.45)}
 .screen-share{display:flex;flex-direction:column;background:#06030f}
 #s-share{padding:0}

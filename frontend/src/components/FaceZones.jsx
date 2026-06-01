@@ -1,3 +1,5 @@
+import { useI18n } from '../context/I18nContext'
+
 function zoneColor(score) {
   if (score >= 80) return '#34C759'
   if (score >= 60) return '#FFD60A'
@@ -15,6 +17,8 @@ function ZoneBadge({ label, score, className }) {
 }
 
 export default function FaceZones({ zones, title }) {
+  const { t } = useI18n()
+
   const z = {
     forehead: zones?.forehead ?? 0,
     nose: zones?.nose ?? 0,
@@ -22,14 +26,18 @@ export default function FaceZones({ zones, title }) {
     chin: zones?.chin ?? 0
   }
 
+  const hasData = [z.forehead, z.nose, z.cheeks, z.chin].some(v => v > 0)
+  if (!hasData) return null
+
   return (
     <div className="face-zones">
       <div className="zone-title">{title}</div>
       <div className="face-map">
-        <ZoneBadge label="Лоб" score={z.forehead} className="zone-top" />
-        <ZoneBadge label="Нос" score={z.nose} className="zone-center" />
-        <ZoneBadge label="Щёки" score={z.cheeks} className="zone-sides" />
-        <ZoneBadge label="Подб" score={z.chin} className="zone-bottom" />
+        <ZoneBadge label={t('zoneForehead')} score={z.forehead} className="zone-top" />
+        <ZoneBadge label={t('zoneCheek')} score={z.cheeks} className="zone-left" />
+        <ZoneBadge label={t('zoneCheek')} score={z.cheeks} className="zone-right" />
+        <ZoneBadge label={t('zoneNose')} score={z.nose} className="zone-nose" />
+        <ZoneBadge label={t('zoneChin')} score={z.chin} className="zone-bottom" />
         <div className="face-map-outline">👤</div>
       </div>
     </div>
