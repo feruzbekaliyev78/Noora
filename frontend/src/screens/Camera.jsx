@@ -131,22 +131,29 @@ export default function Camera() {
     setCheckingCache(true)
 
     try {
-      await loadFaceModels()
-      const imageElement = await loadImageElement(image)
-      const cached = await checkCache(imageElement)
+      const modelsReady = await loadFaceModels().catch(() => false)
 
-      if (cached) {
-        const enriched = {
-          ...cached,
-          realAge: profile.age ?? null,
-          ageDiff: profile.age != null ? profile.age - cached.skinAge : null
+      if (modelsReady) {
+        try {
+          const imageElement = await loadImageElement(image)
+          const cached = await checkCache(imageElement)
+
+          if (cached) {
+            const enriched = {
+              ...cached,
+              realAge: profile.age ?? null,
+              ageDiff: profile.age != null ? profile.age - cached.skinAge : null
+            }
+            setAnalysis(enriched)
+            navigate('/result', { state: { result: enriched, fromCache: true } })
+            return
+          }
+        } catch (err) {
+          console.warn('Face-api cache check skipped:', err)
         }
-        setAnalysis(enriched)
-        navigate('/result', { state: { result: enriched, fromCache: true } })
-        return
       }
     } catch (err) {
-      console.warn('Cache check failed:', err)
+      console.warn('Cache check failed, continuing to analysis:', err)
     } finally {
       setCheckingCache(false)
     }

@@ -2,7 +2,7 @@ const { GoogleGenerativeAI } = require('@google/generative-ai')
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
 
-const MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-3.5-flash']
+const MODELS = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash']
 
 const PROMPT = `
 Ты — профессиональный AI-косметолог. Анализируй кожу на фото.
@@ -70,15 +70,41 @@ function parseImagePayload(imageBase64) {
   }
 }
 
-async function generateWithModel(modelName, imageData) {
+function parseModelJson(text) {
+  const clean = text.replace(/```json|```/g, '').trim()
+  try {
+    return JSON.parse(clean)
+  } catch {
+    const match = clean.match(/\{[\s\S]*\}/)
+    if (match) return JSON.parse(match[0])
+    throw new Error('Invalid JSON from Gemini')
+  }
+}
+
+async function generateWithModel(modelName, imageData, retries = 2) {
   const model = genAI.getGenerativeModel({
     model: modelName,
     generationConfig: GENERATION_CONFIG
   })
-  const result = await model.generateContent([PROMPT, imageData])
-  const text = result.response.text()
-  const clean = text.replace(/```json|```/g, '').trim()
-  return JSON.parse(clean)
+
+  let lastError
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const result = await model.generateContent([PROMPT, imageData])
+      const text = result.response.text()
+      return parseModelJson(text)
+    } catch (err) {
+      lastError = err
+      const retryable = /503|429|high demand|unavailable/i.test(err.message || '')
+      if (attempt < retries && retryable) {
+        await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)))
+        continue
+      }
+      throw err
+    }
+  }
+
+  throw lastError
 }
 
 async function analyzeSkin(imageBase64) {
