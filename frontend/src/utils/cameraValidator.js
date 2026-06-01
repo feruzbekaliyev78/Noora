@@ -89,8 +89,8 @@ export const validateFrame = async (video) => {
 
     return {
       lightOk,
-      faceOk,
       noMakeup,
+      faceOk,
       foreheadOk,
       allGood: lightOk && faceOk && noMakeup && foreheadOk
     }

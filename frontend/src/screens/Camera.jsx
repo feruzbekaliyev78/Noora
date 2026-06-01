@@ -10,18 +10,10 @@ import ScreenHeader from '../components/ScreenHeader'
 
 const EMPTY_VALIDATION = {
   lightOk: false,
-  faceOk: false,
   noMakeup: false,
+  faceOk: false,
   foreheadOk: false,
   allGood: false
-}
-
-function chipStyle(isOk) {
-  return {
-    background: isOk ? 'rgba(52,199,89,0.2)' : 'rgba(255,55,95,0.2)',
-    border: `1px solid ${isOk ? '#34C759' : '#FF375F'}`,
-    color: isOk ? '#34C759' : '#FF375F'
-  }
 }
 
 async function getCameraStream(facingMode = 'user') {
@@ -80,8 +72,6 @@ export default function Camera() {
   const [showTips, setShowTips] = useState(false)
   const [validation, setValidation] = useState(EMPTY_VALIDATION)
   const [checkingCache, setCheckingCache] = useState(false)
-
-  const validatingRef = useRef(false)
 
   const canSnap = ready && validation.allGood && !capturing && !checkingCache
 
@@ -205,31 +195,15 @@ export default function Camera() {
   }, [takeCameraStream, attachStream, startCamera, stopCamera])
 
   useEffect(() => {
-    if (!ready) return undefined
-
-    let cancelled = false
-
-    const runValidation = async () => {
-      const video = videoRef.current
-      if (!video?.videoWidth || cancelled || validatingRef.current) return
-
-      validatingRef.current = true
-      try {
-        const result = await validateFrame(video)
-        if (!cancelled) setValidation(result)
-      } finally {
-        validatingRef.current = false
+    const interval = setInterval(async () => {
+      if (videoRef.current && videoRef.current.readyState === 4) {
+        const result = await validateFrame(videoRef.current)
+        setValidation(result)
       }
-    }
+    }, 500)
 
-    runValidation()
-    const interval = setInterval(runValidation, 500)
-
-    return () => {
-      cancelled = true
-      clearInterval(interval)
-    }
-  }, [ready])
+    return () => clearInterval(interval)
+  }, [])
 
   const snap = () => {
     if (!canSnap || !videoRef.current) return
@@ -285,16 +259,44 @@ export default function Camera() {
           <div className="vfc bl" style={{ borderColor: cornerColor }} />
           <div className="vfc br" style={{ borderColor: cornerColor }} />
           <div className="chips">
-            <div className="chip" style={chipStyle(validation.lightOk)}>
+            <div
+              className="chip"
+              style={{
+                background: validation.lightOk ? 'rgba(52,199,89,0.2)' : 'rgba(255,55,95,0.2)',
+                border: `1px solid ${validation.lightOk ? '#34C759' : '#FF375F'}`,
+                color: validation.lightOk ? '#34C759' : '#FF375F'
+              }}
+            >
               💡 {validation.lightOk ? t('lightGood') : t('lightBad')}
             </div>
-            <div className="chip" style={chipStyle(validation.noMakeup)}>
+            <div
+              className="chip"
+              style={{
+                background: validation.noMakeup ? 'rgba(52,199,89,0.2)' : 'rgba(255,55,95,0.2)',
+                border: `1px solid ${validation.noMakeup ? '#34C759' : '#FF375F'}`,
+                color: validation.noMakeup ? '#34C759' : '#FF375F'
+              }}
+            >
               🚫 {validation.noMakeup ? t('makeupGood') : t('makeupBad')}
             </div>
-            <div className="chip" style={chipStyle(validation.faceOk)}>
+            <div
+              className="chip"
+              style={{
+                background: validation.faceOk ? 'rgba(52,199,89,0.2)' : 'rgba(255,55,95,0.2)',
+                border: `1px solid ${validation.faceOk ? '#34C759' : '#FF375F'}`,
+                color: validation.faceOk ? '#34C759' : '#FF375F'
+              }}
+            >
               👁 {validation.faceOk ? t('camFaceOk') : t('faceNotFound')}
             </div>
-            <div className="chip" style={chipStyle(validation.foreheadOk)}>
+            <div
+              className="chip"
+              style={{
+                background: validation.foreheadOk ? 'rgba(52,199,89,0.2)' : 'rgba(255,55,95,0.2)',
+                border: `1px solid ${validation.foreheadOk ? '#34C759' : '#FF375F'}`,
+                color: validation.foreheadOk ? '#34C759' : '#FF375F'
+              }}
+            >
               ✂️ {validation.foreheadOk ? t('foreheadGood') : t('foreheadBad')}
             </div>
           </div>
