@@ -124,11 +124,8 @@ html,body{
 @keyframes beamA{0%,100%{top:25%;opacity:0}10%,90%{opacity:1}50%{top:75%}}
 .chips{position:absolute;bottom:4vw;left:0;right:0;display:flex;flex-wrap:wrap;justify-content:center;gap:1.5vw;padding:0 2vw}
 .chip{padding:1.2vw 3vw;border-radius:100px;font-size:2.6vw;font-weight:600;
-  display:flex;align-items:center;gap:1.5vw;backdrop-filter:blur(10px)}
-.chip.ok{background:rgba(52,199,89,0.2);color:#34C759;border:1px solid rgba(52,199,89,0.3)}
-.chip.bad{background:rgba(255,55,95,0.2);color:#FF375F;border:1px solid rgba(255,55,95,0.35)}
-.chip.warn{background:rgba(255,159,10,0.2);color:#FF9F0A;border:1px solid rgba(255,159,10,0.3)}
-.chip-dot{width:1.5vw;height:1.5vw;border-radius:50%;background:currentColor;animation:blink 1.5s infinite}
+  display:flex;align-items:center;gap:1vw;backdrop-filter:blur(10px);
+  transition:background 0.2s,border-color 0.2s,color 0.2s}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
 
 .tips{display:flex;gap:2vw;margin-bottom:4vw}
@@ -142,14 +139,14 @@ html,body{
   border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
   font-size:6vw;cursor:pointer;transition:all 0.2s}
 .shutter-side:active{transform:scale(0.9)}
-.shutter{width:18vw;height:18vw;border-radius:50%;background:var(--grad);cursor:pointer;
+.shutter{width:18vw;height:18vw;border-radius:50%;cursor:pointer;
   display:flex;align-items:center;justify-content:center;font-size:8vw;
   border:3px solid rgba(255,255,255,0.15);position:relative;
-  box-shadow:0 0 8vw rgba(191,90,242,0.5),0 0 16vw rgba(191,90,242,0.2);
-  animation:sGlow 3s ease-in-out infinite;transition:all 0.15s}
+  transition:background 0.2s,box-shadow 0.2s,opacity 0.2s,transform 0.15s}
 .shutter::before{content:'';position:absolute;inset:4px;border-radius:50%;border:2px solid rgba(255,255,255,0.25)}
-.shutter:active{transform:scale(0.9)}
-.shutter.disabled{opacity:0.35;pointer-events:none;animation:none;box-shadow:none}
+.shutter-ready{animation:sGlow 3s ease-in-out infinite}
+.shutter-ready:active{transform:scale(0.9)}
+.shutter-disabled{pointer-events:none;animation:none}
 .icon-btn.placeholder{opacity:0;pointer-events:none}
 .screen-header{padding:0 0 2vw}
 @keyframes sGlow{0%,100%{box-shadow:0 0 8vw rgba(191,90,242,0.5)}50%{box-shadow:0 0 14vw rgba(191,90,242,0.8),0 0 24vw rgba(191,90,242,0.3)}}

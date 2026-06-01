@@ -16,6 +16,14 @@ const EMPTY_VALIDATION = {
   allGood: false
 }
 
+function chipStyle(isOk) {
+  return {
+    background: isOk ? 'rgba(52,199,89,0.2)' : 'rgba(255,55,95,0.2)',
+    border: `1px solid ${isOk ? '#34C759' : '#FF375F'}`,
+    color: isOk ? '#34C759' : '#FF375F'
+  }
+}
+
 async function getCameraStream(facingMode = 'user') {
   if (!navigator.mediaDevices?.getUserMedia) {
     throw new Error('Camera API unavailable')
@@ -236,6 +244,19 @@ export default function Camera() {
     processCapture(image)
   }
 
+  const cornerColor = validation.allGood ? '#34C759' : '#BF5AF2'
+  const shutterStyle = validation.allGood
+    ? {
+        background: 'linear-gradient(135deg, #BF5AF2, #FF375F)',
+        boxShadow: '0 0 24px rgba(191,90,242,0.6), 0 0 48px rgba(255,55,95,0.3)',
+        opacity: 1
+      }
+    : {
+        background: '#666',
+        boxShadow: 'none',
+        opacity: 0.4
+      }
+
   return (
     <div className="screen-page">
       <input ref={fileRef} type="file" accept="image/*" hidden onChange={handleGallery} />
@@ -259,22 +280,22 @@ export default function Camera() {
               </div>
             </div>
           )}
-          <div className={`vfc tl ${validation.allGood ? 'ready' : ''}`} />
-          <div className={`vfc tr ${validation.allGood ? 'ready' : ''}`} />
-          <div className={`vfc bl ${validation.allGood ? 'ready' : ''}`} />
-          <div className={`vfc br ${validation.allGood ? 'ready' : ''}`} />
+          <div className="vfc tl" style={{ borderColor: cornerColor }} />
+          <div className="vfc tr" style={{ borderColor: cornerColor }} />
+          <div className="vfc bl" style={{ borderColor: cornerColor }} />
+          <div className="vfc br" style={{ borderColor: cornerColor }} />
           <div className="chips">
-            <div className={`chip ${validation.lightOk ? 'ok' : 'bad'}`}>
-              <div className="chip-dot" />💡 {validation.lightOk ? t('lightGood') : t('lightBad')}
+            <div className="chip" style={chipStyle(validation.lightOk)}>
+              💡 {validation.lightOk ? t('lightGood') : t('lightBad')}
             </div>
-            <div className={`chip ${validation.faceOk ? 'ok' : 'bad'}`}>
-              <div className="chip-dot" />👁 {validation.faceOk ? t('lookGood') : t('faceNotFound')}
+            <div className="chip" style={chipStyle(validation.noMakeup)}>
+              🚫 {validation.noMakeup ? t('makeupGood') : t('makeupBad')}
             </div>
-            <div className={`chip ${validation.foreheadOk ? 'ok' : 'bad'}`}>
-              <div className="chip-dot" />✂️ {validation.foreheadOk ? t('foreheadGood') : t('foreheadBad')}
+            <div className="chip" style={chipStyle(validation.faceOk)}>
+              👁 {validation.faceOk ? t('camFaceOk') : t('faceNotFound')}
             </div>
-            <div className={`chip ${validation.noMakeup ? 'ok' : 'bad'}`}>
-              <div className="chip-dot" />🚫 {validation.noMakeup ? t('makeupGood') : t('makeupBad')}
+            <div className="chip" style={chipStyle(validation.foreheadOk)}>
+              ✂️ {validation.foreheadOk ? t('foreheadGood') : t('foreheadBad')}
             </div>
           </div>
         </div>
@@ -287,8 +308,8 @@ export default function Camera() {
         <div className="shutter-row">
           <div className="shutter-side" onClick={openGallery}>🖼</div>
           <div
-            className={`shutter ${canSnap ? '' : 'disabled'}`}
-            style={{ opacity: canSnap ? 1 : 0.4 }}
+            className={`shutter ${canSnap ? 'shutter-ready' : 'shutter-disabled'}`}
+            style={shutterStyle}
             onClick={snap}
           >
             📸
