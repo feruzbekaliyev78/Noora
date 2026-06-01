@@ -3,18 +3,16 @@ import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { useI18n } from '../context/I18nContext'
 import { captureFromVideo, loadImageElement } from '../utils/image'
-import { initValidator, validateFrame } from '../utils/cameraValidator'
+import { validateFrame } from '../utils/cameraValidator'
 import { loadFaceModels } from '../utils/faceRecognition'
 import { checkCache } from '../services/analysisCache'
 import ScreenHeader from '../components/ScreenHeader'
 
 const EMPTY_VALIDATION = {
-  light: false,
-  lightBright: false,
-  faceFound: false,
-  lookingAt: false,
-  forehead: false,
+  lightOk: false,
+  faceOk: false,
   noMakeup: false,
+  foreheadOk: false,
   allGood: false
 }
 
@@ -76,7 +74,6 @@ export default function Camera() {
   const [checkingCache, setCheckingCache] = useState(false)
 
   const canSnap = ready && validation.allGood && !capturing && !checkingCache
-  const faceReady = validation.faceFound && validation.lookingAt
 
   const attachStream = useCallback(async (stream) => {
     const video = videoRef.current
@@ -183,7 +180,6 @@ export default function Camera() {
   }
 
   useEffect(() => {
-    initValidator().catch(err => console.warn('Validator preload failed:', err))
     loadFaceModels().catch(err => console.warn('Face models preload failed:', err))
 
     const pendingStream = takeCameraStream()
@@ -222,12 +218,6 @@ export default function Camera() {
     processCapture(image)
   }
 
-  const getLookLabel = () => {
-    if (faceReady) return t('lookGood')
-    if (!validation.faceFound) return t('faceNotFound')
-    return t('lookBad')
-  }
-
   return (
     <div className="screen-page">
       <input ref={fileRef} type="file" accept="image/*" hidden onChange={handleGallery} />
@@ -256,14 +246,14 @@ export default function Camera() {
           <div className={`vfc bl ${validation.allGood ? 'ready' : ''}`} />
           <div className={`vfc br ${validation.allGood ? 'ready' : ''}`} />
           <div className="chips">
-            <div className={`chip ${validation.light ? 'ok' : 'bad'}`}>
-              <div className="chip-dot" />💡 {validation.light ? t('lightGood') : (validation.lightBright ? t('lightBright') : t('lightBad'))}
+            <div className={`chip ${validation.lightOk ? 'ok' : 'bad'}`}>
+              <div className="chip-dot" />💡 {validation.lightOk ? t('lightGood') : t('lightBad')}
             </div>
-            <div className={`chip ${faceReady ? 'ok' : 'bad'}`}>
-              <div className="chip-dot" />👁 {getLookLabel()}
+            <div className={`chip ${validation.faceOk ? 'ok' : 'bad'}`}>
+              <div className="chip-dot" />👁 {validation.faceOk ? t('lookGood') : t('faceNotFound')}
             </div>
-            <div className={`chip ${validation.forehead ? 'ok' : 'bad'}`}>
-              <div className="chip-dot" />✂️ {validation.forehead ? t('foreheadGood') : t('foreheadBad')}
+            <div className={`chip ${validation.foreheadOk ? 'ok' : 'bad'}`}>
+              <div className="chip-dot" />✂️ {validation.foreheadOk ? t('foreheadGood') : t('foreheadBad')}
             </div>
             <div className={`chip ${validation.noMakeup ? 'ok' : 'bad'}`}>
               <div className="chip-dot" />🚫 {validation.noMakeup ? t('makeupGood') : t('makeupBad')}
